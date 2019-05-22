@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'login_background.dart';
+import 'screen_contacts.dart';
 
 class LoginScreen extends StatefulWidget {
   LoginScreen({Key key}) : super(key: key);
@@ -12,6 +13,11 @@ class _LoginScreenState extends State<LoginScreen> {
   FocusNode noneFN = FocusNode();
   FocusNode usernameFN = FocusNode();
   FocusNode passwordFN = FocusNode();
+
+  void login() {
+    Navigator.of(context, rootNavigator: true)
+        .push(MaterialPageRoute(builder: (context) => ContactsScreen()));
+  }
 
   Widget _buildLoginForm() {
     return Form(
@@ -52,7 +58,9 @@ class _LoginScreenState extends State<LoginScreen> {
                       textColor: Colors.white,
                       color: Theme.of(context).primaryColor,
                       child: Text("Login"),
-                      onPressed: () {},
+                      onPressed: () {
+                        login();
+                      },
                       shape: new RoundedRectangleBorder(
                           borderRadius: new BorderRadius.circular(30.0))),
                 ),
