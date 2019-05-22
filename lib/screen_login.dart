@@ -13,6 +13,7 @@ class _LoginScreenState extends State<LoginScreen> {
   FocusNode noneFN = FocusNode();
   FocusNode usernameFN = FocusNode();
   FocusNode passwordFN = FocusNode();
+  FocusNode emailFN = FocusNode();
 
   void login() {
     Navigator.of(context, rootNavigator: true)
@@ -113,6 +114,16 @@ class _LoginScreenState extends State<LoginScreen> {
                   decoration: InputDecoration(labelText: 'Password'),
                   keyboardType: TextInputType.emailAddress,
                   focusNode: passwordFN,
+                  onFieldSubmitted: (text) {
+                    FocusScope.of(context).requestFocus(emailFN);
+                  }),
+            ),
+            Container(
+              child: TextFormField(
+                  textInputAction: TextInputAction.next,
+                  decoration: InputDecoration(labelText: 'Email'),
+                  keyboardType: TextInputType.emailAddress,
+                  focusNode: emailFN,
                   onFieldSubmitted: (text) {
                     FocusScope.of(context).requestFocus(noneFN);
                   }),
