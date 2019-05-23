@@ -15,4 +15,4 @@ print("Registering..\n")
 r = requests.post(URL_REGISTER,
  json=register_payload
  )
-print(r.json())
+print(r.text);

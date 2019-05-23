@@ -15,17 +15,17 @@ class Background extends StatelessWidget {
               WavyHeader(),
             ],
           ),
-          Expanded(
-            child: Container(
-            ),
-          ),
-          Stack(
-            alignment: Alignment.bottomLeft,
-            children: <Widget>[
-              WavyFooter(),
+          // Expanded(
+          //   child: Container(
+          //   ),
+          // ),
+          // Stack(
+          //   alignment: Alignment.bottomLeft,
+          //   children: <Widget>[
+          //     WavyFooter(),
 
-            ],
-          )
+          //   ],
+          // )
         ],
       ),
     );

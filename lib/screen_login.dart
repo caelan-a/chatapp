@@ -9,7 +9,8 @@ class LoginScreen extends StatefulWidget {
   _LoginScreenState createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginScreenState extends State<LoginScreen>
+    with SingleTickerProviderStateMixin {
   FocusNode noneFN = FocusNode();
   FocusNode usernameFN = FocusNode();
   FocusNode passwordFN = FocusNode();
@@ -156,6 +157,7 @@ class _LoginScreenState extends State<LoginScreen> {
         children: <Widget>[
           Background(),
           _buildLoginForm(),
+          // _buildRegisterForm(),
         ],
       ),
     );

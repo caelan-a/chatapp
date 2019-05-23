@@ -1,13 +1,7 @@
 import 'package:flutter/material.dart';
 import 'login_background.dart';
-
-class Contact {
-  String username;
-  String avatarURL;
-  int lastContacted; // Change to datetime
-
-  Contact({this.username, this.avatarURL, this.lastContacted});
-}
+import 'screen_call.dart';
+import 'contact.dart';
 
 class ContactsScreen extends StatefulWidget {
   ContactsScreen({Key key}) : super(key: key);
@@ -21,14 +15,20 @@ class _ContactsScreenState extends State<ContactsScreen> {
     Contact(
         username: "Caelan",
         avatarURL:
-            "http://gravatar.com/avatar/db3169a8e59167940a271dbd078388e8",
+            "https://media.licdn.com/dms/image/C5603AQEPfzcv_X-kcw/profile-displayphoto-shrink_200_200/0?e=1564012800&v=beta&t=cxHyt4d9MIFI8y2SML3cdkjdplS5Ig8AuwI7MsP5qD0",
         lastContacted: 1),
     Contact(
         username: "Johnathon",
         avatarURL:
-            "http://gravatar.com/avatar/db3169a8e59167940a271dbd078388e8",
+            "https://media.licdn.com/dms/image/C5603AQEPfzcv_X-kcw/profile-displayphoto-shrink_200_200/0?e=1564012800&v=beta&t=cxHyt4d9MIFI8y2SML3cdkjdplS5Ig8AuwI7MsP5qD0",
         lastContacted: 2),
   ];
+
+  void callContact(Contact contact) {
+    print("Call contact");
+        Navigator.of(context, rootNavigator: true)
+        .push(MaterialPageRoute(builder: (context) => CallScreen(contact: contact)));
+  }
 
   Widget _buildContactList() {
     List<Widget> tiles = [];
@@ -47,7 +47,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
     tiles.addAll(contacts.map((Contact contact) {
       return Column(children: <Widget>[
         _buildContactTile(
-            contact.username, contact.avatarURL, contact.lastContacted),
+            contact.username, contact.avatarURL, contact.lastContacted, () => callContact(contact)),
         Container(
           padding: EdgeInsets.fromLTRB(0.0, 0.0, 20.0, 0.0),
           child: Divider(
@@ -61,7 +61,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
   }
 
   Widget _buildContactTile(
-      String username, String avatarURL, int lastContacted) {
+      String username, String avatarURL, int lastContacted, Function onCall) {
     return Container(
       padding: EdgeInsets.fromLTRB(10.0, 0.0, 10.0, 0.0),
       child: ListTile(
@@ -97,7 +97,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
           color: Colors.grey[600],
           size: 30.0,
         ),
-        onTap: () {},
+        onTap: () => onCall(),
       ),
     );
   }
@@ -109,10 +109,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
       appBar: AppBar(
           backgroundColor: Colors.white,
           centerTitle: true,
-          title: Image.asset(
-            'assets/chat_app.png',
-            scale: 0.5,
-          ),
+
           leading: IconButton(
             iconSize: 24.0,
             icon: Icon(
