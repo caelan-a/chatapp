@@ -26,8 +26,8 @@ class _ContactsScreenState extends State<ContactsScreen> {
 
   void callContact(Contact contact) {
     print("Call contact");
-        Navigator.of(context, rootNavigator: true)
-        .push(MaterialPageRoute(builder: (context) => CallScreen(contact: contact)));
+    Navigator.of(context, rootNavigator: true).push(
+        MaterialPageRoute(builder: (context) => CallScreen(contact: contact)));
   }
 
   Widget _buildContactList() {
@@ -46,8 +46,8 @@ class _ContactsScreenState extends State<ContactsScreen> {
     );
     tiles.addAll(contacts.map((Contact contact) {
       return Column(children: <Widget>[
-        _buildContactTile(
-            contact.username, contact.avatarURL, contact.lastContacted, () => callContact(contact)),
+        _buildContactTile(contact.username, contact.avatarURL,
+            contact.lastContacted, () => callContact(contact)),
         Container(
           padding: EdgeInsets.fromLTRB(0.0, 0.0, 20.0, 0.0),
           child: Divider(
@@ -109,19 +109,22 @@ class _ContactsScreenState extends State<ContactsScreen> {
       appBar: AppBar(
           backgroundColor: Colors.white,
           centerTitle: true,
-
           leading: IconButton(
             iconSize: 24.0,
             icon: Icon(
-              Icons.exit_to_app,
+              Icons.person_add,
               color: Colors.grey[600],
             ),
             onPressed: () {},
           ),
           actions: <Widget>[
-            Icon(
-              Icons.person_add,
-              color: Colors.grey[600],
+            IconButton(
+              iconSize: 24.0,
+              icon: Icon(
+                Icons.exit_to_app,
+                color: Colors.grey[600],
+              ),
+              onPressed: () {},
             ),
             Padding(
               padding: EdgeInsets.all(10.0),
