@@ -11,49 +11,57 @@ class UserData {
 
   List<Contact> savedContacts;
 
-  UserData(String username, String password, String authHeader) {
-
-  }
-
-  Future<void> saveLocalUser() {
-
-  }
+  UserData({this.username, password, this.authHeader, this.savedContacts}) {}
 
   void saveContact(Contact contact) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    if(!savedContacts.contains(contact)) {
+    if (!savedContacts.contains(contact)) {
       savedContacts.add(contact);
     }
-    prefs.setString(username+"_contacts", jsonEncode(savedContacts));
+    prefs.setStringList(username + "_contacts",
+        savedContacts.map((c) => jsonEncode(c.toJson())));
   }
 
-  void loadContacts() async {
+  static Future<List<Contact>> loadContacts(String username) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    savedContacts = jsonDecode(prefs.get(username+"_contacts"));
+    return prefs
+        .getStringList(username + "_contacts")
+        .map((rawJson) => Contact.fromJson(jsonDecode(rawJson)))
+        .toList();
   }
 
-  Future
-
-  Future<bool> localUserExists() {}
+  Future<bool> localUserExists() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.containsKey("username");
+  }
 
   static UserData autoLogin() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    
+
     //  local user exists
-    if(await prefs.containsKey("username")) {
+    if (prefs.containsKey("username")) {
       String username = prefs.getString("username");
       String password = prefs.getString("password");
+      List<Contact> contacts;
 
-      Map<String, String> response = await Database.sendLoginRequest(username, password);
+      Map<String, String> response =
+          await Database.sendLoginRequest(username, password);
 
-      if(response['success'] == "true") {
+      if (response['success'] == "true") {
         String authHeader = response['authHeader'];
-        List<Contact> 
+
+        //  Load contacts
+        if (prefs.containsKey(username + "_contacts")) {
+          contacts = await loadContacts(username);
+        } else {
+          contacts = [];
+        }
       }
+      return UserData(
+        username: username,
+        authHeader: authHeader,
+        savedContacts:
+      );
     }
-
-
   }
-
-  Future<void> loadContacts() {}
 }
