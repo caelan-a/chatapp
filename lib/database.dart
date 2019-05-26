@@ -1,0 +1,74 @@
+import 'dart:async';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:flutter/material.dart';
+import 'dart:io';
+
+/*
+  Functions and keys for communicating with BBH API
+*/
+
+class Database {
+  static const int timeout = 30; //  s
+
+  static const String URL_REGISTER =
+      "http://ec2-18-237-100-56.us-west-2.compute.amazonaws.com/register/auth";
+  static const String URL =
+      "http://ec2-18-237-100-56.us-west-2.compute.amazonaws.com/api";
+  static const String URL_LOGIN =
+      "http://ec2-18-237-100-56.us-west-2.compute.amazonaws.com/my/auth";
+
+  //  Return authHeader
+  static Future<Map<String, String>> sendLoginRequest(
+      String username, String password) async {
+    // Map<String, dynamic> json_data = {
+    //   "Username": username,
+    //   "Password": password,
+    // };
+
+    // var response = json
+    //     .decode(json.decode(await _post(URL_LOGIN, "", jsonEncode(json_data))));
+    // print(response);
+
+    Map<String, String> response = {"response" : "success", "authHeader" : ""};
+    return response;
+  }
+
+  static Future<dynamic> sendRegisterRequest(
+      String username, String password, String email) async {
+    Map<String, dynamic> json_data = {
+      "Username": username,
+      "Password": password,
+      "Email": email,
+    };
+
+    var response = json.decode(
+        json.decode(await _post(URL_REGISTER, "", jsonEncode(json_data))));
+    print(response);
+  }
+
+  static Future<String> _post(String url, String authHeader, var body) async {
+    return await http.post(Uri.encodeFull(url), body: body, headers: {
+      "Content-Type": "application/json",
+      "AuthHeader": authHeader,
+    }).then((http.Response response) {
+      // print(response.body);
+      final int statusCode = response.statusCode;
+      if (statusCode < 200 || statusCode > 400 || json == null) {
+        throw new Exception("Error while fetching data");
+      }
+      return response.body;
+    }).timeout(Duration(seconds: timeout));
+  }
+
+  static onError(BuildContext context, dynamic error, dynamic stackTrace,
+      Function retryFunction) async {
+    int errno;
+    if (error is SocketException) {
+      errno = error.osError.errorCode;
+    } else {
+      errno = 0;
+    }
+    print(errno);
+  }
+}

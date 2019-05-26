@@ -1,6 +1,8 @@
+import 'package:chatapp/screen_register.dart';
 import 'package:flutter/material.dart';
 import 'login_background.dart';
 import 'screen_contacts.dart';
+import 'register.dart';
 
 class LoginScreen extends StatefulWidget {
   LoginScreen({Key key}) : super(key: key);
@@ -19,6 +21,11 @@ class _LoginScreenState extends State<LoginScreen>
   void login() {
     Navigator.of(context, rootNavigator: true)
         .push(MaterialPageRoute(builder: (context) => ContactsScreen()));
+  }
+
+  void goToSignUp() {
+        Navigator.of(context, rootNavigator: true)
+        .push(MaterialPageRoute(builder: (context) => RegisterScreen()));
   }
 
   Widget _buildLoginForm() {
@@ -76,7 +83,9 @@ class _LoginScreenState extends State<LoginScreen>
                               BorderSide(color: Theme.of(context).primaryColor),
                           borderRadius: new BorderRadius.circular(30.0)),
                       textColor: Theme.of(context).primaryColor,
-                      onPressed: () {},
+                      onPressed: () {
+                        goToSignUp();
+                      },
                       color: Theme.of(context).primaryColor,
                       child: Text("Sign Up"),
                     )),

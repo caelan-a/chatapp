@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'login_background.dart';
+import 'package:intl/intl.dart';
 import 'screen_call.dart';
 import 'contact.dart';
 
@@ -16,12 +17,12 @@ class _ContactsScreenState extends State<ContactsScreen> {
         username: "Caelan",
         avatarURL:
             "https://media.licdn.com/dms/image/C5603AQEPfzcv_X-kcw/profile-displayphoto-shrink_200_200/0?e=1564012800&v=beta&t=cxHyt4d9MIFI8y2SML3cdkjdplS5Ig8AuwI7MsP5qD0",
-        lastContacted: 1),
+        lastContacted: DateTime.now()),
     Contact(
         username: "Johnathon",
         avatarURL:
             "https://media.licdn.com/dms/image/C5603AQEPfzcv_X-kcw/profile-displayphoto-shrink_200_200/0?e=1564012800&v=beta&t=cxHyt4d9MIFI8y2SML3cdkjdplS5Ig8AuwI7MsP5qD0",
-        lastContacted: 2),
+        lastContacted: DateTime.now()),
   ];
 
   void callContact(Contact contact) {
@@ -61,7 +62,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
   }
 
   Widget _buildContactTile(
-      String username, String avatarURL, int lastContacted, Function onCall) {
+      String username, String avatarURL, DateTime lastContacted, Function onCall) {
     return Container(
       padding: EdgeInsets.fromLTRB(10.0, 0.0, 10.0, 0.0),
       child: ListTile(
@@ -85,11 +86,18 @@ class _ContactsScreenState extends State<ContactsScreen> {
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Text("Last called 12/04/10",
-                style: TextStyle(
-                    fontWeight: FontWeight.normal,
-                    fontSize: 14.0,
-                    color: Colors.grey[600])),
+            Container(
+                alignment: AlignmentDirectional.centerStart,
+                  child: Text(
+                    "Last Contacted " + DateFormat('dd MMM').format(lastContacted),
+                    style: TextStyle(
+                        color: Colors.grey,
+                        fontSize: 12.0,
+                        fontStyle: FontStyle.normal),
+                  ),
+                  margin: EdgeInsets.only(left: 3.0, top: .0, bottom: 5.0),
+                )
+           
           ],
         ),
         trailing: Icon(
@@ -109,6 +117,15 @@ class _ContactsScreenState extends State<ContactsScreen> {
       appBar: AppBar(
           backgroundColor: Colors.white,
           centerTitle: true,
+          title: ClipRRect(
+            borderRadius: BorderRadius.circular(30.0),
+            child: Image.asset(
+              "assets/0.jpg",
+              fit: BoxFit.cover,
+              height: 35.0,
+              width: 35.0,
+            ),
+          ),
           leading: IconButton(
             iconSize: 24.0,
             icon: Icon(
@@ -124,10 +141,12 @@ class _ContactsScreenState extends State<ContactsScreen> {
                 Icons.exit_to_app,
                 color: Colors.grey[600],
               ),
-              onPressed: () {},
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
             ),
             Padding(
-              padding: EdgeInsets.all(10.0),
+              padding: EdgeInsets.all(5.0),
             )
           ]),
       body: _buildContactList(),

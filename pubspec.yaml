@@ -18,6 +18,9 @@ environment:
 
 dependencies:
   flutter_webrtc: 
+  cached_network_image: ^0.8.0
+  intl:
+  shared_preferences: ^0.5.2+1
   flutter:
     sdk: flutter
 

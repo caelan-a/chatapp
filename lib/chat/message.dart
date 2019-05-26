@@ -1,19 +1,24 @@
 import 'package:flutter/material.dart';
-// import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:intl/intl.dart';
 import 'window_chat.dart';
 import '../contact.dart';
 
 enum MessageType { text, image }
 
-class Message {
+class Message implements Comparable<Message> {
   final type;
   final String idFrom;
-  final String avatarURLFrom;
   final String idTo;
-  final String avatarURLTo;
-  
+
   final DateTime timestamp;
   final dynamic content;
+
+  //  Used to order messages
+  int compareTo(Message other) {
+    int order = other.timestamp.compareTo(timestamp);
+    return order;
+  }
 
   Message({
     @required this.type,
@@ -68,7 +73,7 @@ class MessageTile extends StatelessWidget {
                   padding: EdgeInsets.fromLTRB(15.0, 10.0, 15.0, 10.0),
                   width: 200.0,
                   decoration: BoxDecoration(
-                      color: Colors.grey,
+                      color: chatWindow.localUserColor,
                       borderRadius: BorderRadius.circular(8.0)),
                   margin: EdgeInsets.only(
                       bottom: isUsersLastMessage ? 20.0 : 10.0, right: 10.0),
@@ -113,7 +118,7 @@ class MessageTile extends StatelessWidget {
                   ),
                   margin: EdgeInsets.only(
                       bottom: isUsersLastMessage ? 20.0 : 10.0, right: 10.0),
-                )
+                ),
         ],
         mainAxisAlignment: MainAxisAlignment.end,
       );
@@ -131,7 +136,7 @@ class MessageTile extends StatelessWidget {
                               child: CircularProgressIndicator(
                                 strokeWidth: 1.0,
                                 valueColor:
-                                    AlwaysStoppedAnimation<Color>(Colors.blue),
+                                    AlwaysStoppedAnimation<Color>(Theme.of(context).primaryColor),
                               ),
                               width: 35.0,
                               height: 35.0,
@@ -157,9 +162,9 @@ class MessageTile extends StatelessWidget {
                       padding: EdgeInsets.fromLTRB(15.0, 10.0, 15.0, 10.0),
                       width: 200.0,
                       decoration: BoxDecoration(
-                          color: Colors.blue,
+                          color: chatWindow.remoteUserCOlor,
                           borderRadius: BorderRadius.circular(8.0)),
-                      margin: EdgeInsets.only(left: 10.0),
+                      margin: EdgeInsets.only(left: 10.0, bottom: 10.0),
                     )
                   : Container(
                       child: Material(
@@ -203,6 +208,19 @@ class MessageTile extends StatelessWidget {
                     )
             ],
           ),
+          (isUsersLastMessage && !fromLocalUser)
+              ? Container(
+                alignment: AlignmentDirectional.centerStart,
+                  child: Text(
+                    DateFormat('dd MMM kk:mm').format(timestamp),
+                    style: TextStyle(
+                        color: Colors.grey,
+                        fontSize: 12.0,
+                        fontStyle: FontStyle.italic),
+                  ),
+                  margin: EdgeInsets.only(left: 50.0, top: .0, bottom: 5.0),
+                )
+              : Container()
         ],
       ));
     }

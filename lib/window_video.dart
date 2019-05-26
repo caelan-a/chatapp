@@ -12,7 +12,9 @@ const textStyle = TextStyle(
 class VideoWindow extends StatefulWidget {
   Contact contact;
 
-  VideoWindow({@required this.contact});
+  TabController tabController;
+
+  VideoWindow({@required this.contact, @required this.tabController});
 
   @override
   State createState() => _VideoWindowState();
@@ -23,6 +25,10 @@ class _VideoWindowState extends State<VideoWindow>
   @override
   void initState() {
     super.initState();
+  }
+
+  void onEndCall() {
+    Navigator.of(context).pop();
   }
 
   @override
@@ -84,7 +90,9 @@ class _VideoWindowState extends State<VideoWindow>
                       side: BorderSide(color: Colors.white),
                       borderRadius: new BorderRadius.circular(30.0)),
                   textColor: Colors.white,
-                  onPressed: () {},
+                  onPressed: () {
+                    onEndCall();
+                  },
                   color: Colors.white,
                   child: Row(
                     children: <Widget>[
@@ -94,6 +102,19 @@ class _VideoWindowState extends State<VideoWindow>
                   ),
                 )),
           ),
+          Positioned(
+                left: 20.0,
+                top: 20.0,
+                child: IconButton(
+                  icon: Icon(Icons.message),
+                  color: Colors.white,
+                  onPressed: () {
+                    setState(() {
+                      widget.tabController.animateTo(0);
+                    });
+                  },
+                ),
+              )
         ],
       ),
     );
