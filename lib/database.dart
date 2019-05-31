@@ -25,7 +25,8 @@ class Database {
   static const String URL_LOGIN =
       "http://ec2-18-237-100-56.us-west-2.compute.amazonaws.com/my/auth";
 
-  static const String URL_SEARCH =  "http://ec2-18-237-100-56.us-west-2.compute.amazonaws.com/api";
+  static const String URL_SEARCH =
+      "http://ec2-18-237-100-56.us-west-2.compute.amazonaws.com/api";
 
   //  Used for simulating network lag
   static void justWait({@required int numberOfSeconds}) async {
@@ -43,21 +44,28 @@ class Database {
     // var response = json.decode(json.decode(await _post(URL_LOGIN, "", jsonEncode(json_data))));
 
     await justWait(numberOfSeconds: 2);
-    Map<String, dynamic> result = {"status" : LoginResponse.success, "authHeader" : "IamcaelanUserxxxAuthxxxUnique"};
+    Map<String, dynamic> result = {
+      "status": LoginResponse.success,
+      "authHeader": "IamcaelanUserxxxAuthxxxUnique"
+    };
     return result;
   }
 
   static Future<List<Contact>> searchContacts(String searchString) async {
     print("Search contacts");
-    var response = json.decode(await _get(URL_SEARCH, {"Username" : searchString}));
+    var response =
+        json.decode(await _get(URL_SEARCH, {"Username": searchString}));
 
     List<Contact> returnedContacts = [];
 
-    (response['users'] as List).forEach((dynamic contact) {
-      returnedContacts.add(Contact(username: contact['Username'], visibleName: contact['Name']));
-    });
+    if (response['users'] != null) {
+      (response['users'] as List).forEach((dynamic contact) {
+        returnedContacts.add(Contact(
+            username: contact['Username'], visibleName: contact['Name']));
+      });
+    } 
     print(response["users"]);
-    
+
     return returnedContacts;
   }
 
@@ -88,11 +96,11 @@ class Database {
     }).timeout(Duration(seconds: timeout));
   }
 
-
-  static Future<String> _get(String url, Map<String, String> queryParams) async {
+  static Future<String> _get(
+      String url, Map<String, String> queryParams) async {
     String queryString = "?";
 
-    queryParams.forEach((key, value){
+    queryParams.forEach((key, value) {
       queryString += key + "=" + value + "&";
     });
 

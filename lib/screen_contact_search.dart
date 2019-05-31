@@ -23,42 +23,54 @@ class _ContactSearchScreenState extends State<ContactSearchScreen> {
   List<Contact> returnedContacts = [];
   List<Contact> contactsToShow = [];
 
+  // @override
+  // void initState() {
+
+  // }
+
   Future<void> searchContacts(String searchString) async {
     setState(() {
       loading = true;
     });
     return Database.searchContacts(searchController.text)
         .then((contacts) async {
-      returnedContacts = contacts;
+      returnedContacts = [];
+      contactsToShow = [];
+      print(contacts);
+      if (contacts.isNotEmpty) {
+        returnedContacts = contacts;
+        contactsToShow = widget.userData.savedContacts;
 
-      contactsToShow = widget.userData.savedContacts;
+        // returnedContacts.forEach((Contact c) {
+        //   String username = c.username;
 
-      returnedContacts.forEach((Contact c) {
-        String username = c.username;
+        //   bool isNewContact = true;
+        //   widget.userData.savedContacts.forEach((Contact savedC) {
+        //     String usernameSavedC = savedC.username;
 
-        bool isNewContact = true;
-        widget.userData.savedContacts.forEach((Contact savedC) {
-          String usernameSavedC = savedC.username;
+        //     if (usernameSavedC == username) {
+        //       isNewContact = false;
+        //     }
+        //   });
 
-          if (usernameSavedC == username) {
-            isNewContact = false;
-          }
-        });
-
-        if (isNewContact) {
-          contactsToShow.add(c);
-        }
-      });
+        //   if (isNewContact) {
+        //     contactsToShow.add(c);
+        //   }
+        // });
+      } else {
+        returnedContacts = [];
+        contactsToShow = [];
+        print("No contacts");
+      }
     });
   }
 
   Widget _buildContactList() {
-    List<Widget> tiles;
-
-    tiles.addAll(contactsToShow.map((Contact contact) {
+    return ListView(
+        children: contactsToShow.map((Contact contact) {
       return Column(children: <Widget>[
-        _buildContactTile(contact.username, contact.avatarURL,
-            contact.lastContacted, contact.requestSent),
+        _buildContactTile(contact.visibleName, contact.username,
+            contact.avatarURL, contact.requestSent),
         Container(
           padding: EdgeInsets.fromLTRB(0.0, 0.0, 20.0, 0.0),
           child: Divider(
@@ -66,13 +78,11 @@ class _ContactSearchScreenState extends State<ContactSearchScreen> {
           ),
         )
       ]);
-    }));
-
-    return ListView(children: tiles);
+    }).toList());
   }
 
-  Widget _buildContactTile(String username, String avatarPath,
-      DateTime lastContacted, bool requestSent) {
+  Widget _buildContactTile(
+      String name, String username, String avatarPath, bool requestSent) {
     return Container(
       padding: EdgeInsets.fromLTRB(10.0, 0.0, 10.0, 0.0),
       child: ListTile(
@@ -86,12 +96,15 @@ class _ContactSearchScreenState extends State<ContactSearchScreen> {
                     // height: 60.0,
                     // width: 100.0,
                   )
-                : Icon(Icons.person)),
+                : Icon(
+                    Icons.person,
+                    size: 40.0,
+                  )),
         title: Text(
-          username,
+          name,
           style: TextStyle(
               fontWeight: FontWeight.normal,
-              fontSize: 24.0,
+              fontSize: 20.0,
               color: Colors.grey[600]),
         ),
         subtitle: Column(
@@ -100,25 +113,25 @@ class _ContactSearchScreenState extends State<ContactSearchScreen> {
             Container(
               alignment: AlignmentDirectional.centerStart,
               child: Text(
-                "Last Contacted " + DateFormat('dd MMM').format(lastContacted),
+                username,
                 style: TextStyle(
                     color: Colors.grey,
                     fontSize: 12.0,
                     fontStyle: FontStyle.normal),
               ),
-              margin: EdgeInsets.only(left: 3.0, top: .0, bottom: 5.0),
+              margin: EdgeInsets.only(left: 0.0, top: .0, bottom: 5.0),
             )
           ],
         ),
         trailing: requestSent
             ? Icon(
                 Icons.check,
-                color: Colors.grey[600],
+                color: Colors.grey[400],
                 size: 30.0,
               )
             : Icon(
                 Icons.person_add,
-                color: Colors.grey[600],
+                color: Colors.grey[400],
                 size: 30.0,
               ),
       ),
@@ -170,7 +183,18 @@ class _ContactSearchScreenState extends State<ContactSearchScreen> {
               child: CircularProgressIndicator(
                   valueColor: AlwaysStoppedAnimation<Color>(
                       Theme.of(context).primaryColor)))
-          : _buildContactList(),
+          : searchController.text.isNotEmpty
+              ? (contactsToShow.isNotEmpty)
+                  ? _buildContactList()
+                  : Container(
+                      padding: EdgeInsets.all(50.0),
+                      child: Text(
+                        "No results found\n\nPlease check spelling and try again",
+                        textAlign: TextAlign.center,
+                        style:
+                            TextStyle(fontSize: 16.0, color: Colors.grey[600]),
+                      ))
+              : Container(),
     );
   }
 }
