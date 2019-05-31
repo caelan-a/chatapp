@@ -33,7 +33,7 @@ class _RegisterScreenState extends State<RegisterScreen>
               child: TextFormField(
                 textInputAction: TextInputAction.next,
                 decoration: InputDecoration(
-                    labelText: 'Username',
+                    hintText: 'Username',
                     alignLabelWithHint: true,
                     hintStyle: TextStyle()),
                 keyboardType: TextInputType.emailAddress,

@@ -3,28 +3,20 @@ import 'login_background.dart';
 import 'package:intl/intl.dart';
 import 'screen_call.dart';
 import 'contact.dart';
+import 'user_data.dart';
+import 'main.dart';
+import 'package:chatapp/screen_contact_search.dart';
 
 class ContactsScreen extends StatefulWidget {
-  ContactsScreen({Key key}) : super(key: key);
+  UserData userData;
+
+  ContactsScreen({Key key, @required this.userData}) : super(key: key);
 
   @override
   _ContactsScreenState createState() => _ContactsScreenState();
 }
 
 class _ContactsScreenState extends State<ContactsScreen> {
-  List<Contact> contacts = [
-    Contact(
-        username: "Caelan",
-        avatarURL:
-            "https://media.licdn.com/dms/image/C5603AQEPfzcv_X-kcw/profile-displayphoto-shrink_200_200/0?e=1564012800&v=beta&t=cxHyt4d9MIFI8y2SML3cdkjdplS5Ig8AuwI7MsP5qD0",
-        lastContacted: DateTime.now()),
-    Contact(
-        username: "Johnathon",
-        avatarURL:
-            "https://media.licdn.com/dms/image/C5603AQEPfzcv_X-kcw/profile-displayphoto-shrink_200_200/0?e=1564012800&v=beta&t=cxHyt4d9MIFI8y2SML3cdkjdplS5Ig8AuwI7MsP5qD0",
-        lastContacted: DateTime.now()),
-  ];
-
   void callContact(Contact contact) {
     print("Call contact");
     Navigator.of(context, rootNavigator: true).push(
@@ -45,7 +37,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
         ),
       ),
     );
-    tiles.addAll(contacts.map((Contact contact) {
+    tiles.addAll(widget.userData.savedContacts.map((Contact contact) {
       return Column(children: <Widget>[
         _buildContactTile(contact.username, contact.avatarURL,
             contact.lastContacted, () => callContact(contact)),
@@ -61,21 +53,22 @@ class _ContactsScreenState extends State<ContactsScreen> {
     return ListView(children: tiles);
   }
 
-  Widget _buildContactTile(
-      String username, String avatarURL, DateTime lastContacted, Function onCall) {
+  Widget _buildContactTile(String username, String avatarPath,
+      DateTime lastContacted, Function onCall) {
     return Container(
       padding: EdgeInsets.fromLTRB(10.0, 0.0, 10.0, 0.0),
       child: ListTile(
         contentPadding: EdgeInsets.fromLTRB(10.0, 10.0, 10.0, 0.0),
         leading: ClipRRect(
-          borderRadius: BorderRadius.circular(30.0),
-          child: Image.asset(
-            "assets/0.jpg",
-            fit: BoxFit.cover,
-            // height: 60.0,
-            // width: 100.0,
-          ),
-        ),
+            borderRadius: BorderRadius.circular(30.0),
+            child: avatarPath != ""
+                ? Image.asset(
+                    avatarPath,
+                    fit: BoxFit.cover,
+                    // height: 60.0,
+                    // width: 100.0,
+                  )
+                : Icon(Icons.person)),
         title: Text(
           username,
           style: TextStyle(
@@ -87,17 +80,16 @@ class _ContactsScreenState extends State<ContactsScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Container(
-                alignment: AlignmentDirectional.centerStart,
-                  child: Text(
-                    "Last Contacted " + DateFormat('dd MMM').format(lastContacted),
-                    style: TextStyle(
-                        color: Colors.grey,
-                        fontSize: 12.0,
-                        fontStyle: FontStyle.normal),
-                  ),
-                  margin: EdgeInsets.only(left: 3.0, top: .0, bottom: 5.0),
-                )
-           
+              alignment: AlignmentDirectional.centerStart,
+              child: Text(
+                "Last Contacted " + DateFormat('dd MMM').format(lastContacted),
+                style: TextStyle(
+                    color: Colors.grey,
+                    fontSize: 12.0,
+                    fontStyle: FontStyle.normal),
+              ),
+              margin: EdgeInsets.only(left: 3.0, top: .0, bottom: 5.0),
+            )
           ],
         ),
         trailing: Icon(
@@ -113,43 +105,53 @@ class _ContactsScreenState extends State<ContactsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomPadding: false,
-      appBar: AppBar(
-          backgroundColor: Colors.white,
-          centerTitle: true,
-          title: ClipRRect(
-            borderRadius: BorderRadius.circular(30.0),
-            child: Image.asset(
-              "assets/0.jpg",
-              fit: BoxFit.cover,
-              height: 35.0,
-              width: 35.0,
+        resizeToAvoidBottomPadding: false,
+        appBar: AppBar(
+            backgroundColor: Colors.white,
+            centerTitle: true,
+            title: ClipRRect(
+              borderRadius: BorderRadius.circular(30.0),
+              child: Image.asset(
+                "assets/0.jpg",
+                fit: BoxFit.cover,
+                height: 35.0,
+                width: 35.0,
+              ),
             ),
-          ),
-          leading: IconButton(
-            iconSize: 24.0,
-            icon: Icon(
-              Icons.person_add,
-              color: Colors.grey[600],
-            ),
-            onPressed: () {},
-          ),
-          actions: <Widget>[
-            IconButton(
+            leading: IconButton(
               iconSize: 24.0,
               icon: Icon(
-                Icons.exit_to_app,
+                Icons.person_add,
                 color: Colors.grey[600],
               ),
               onPressed: () {
-                Navigator.of(context).pop();
+                Main.toScreen(
+                    context, ContactSearchScreen(userData: widget.userData));
               },
             ),
-            Padding(
-              padding: EdgeInsets.all(5.0),
-            )
-          ]),
-      body: _buildContactList(),
-    );
+            actions: <Widget>[
+              IconButton(
+                iconSize: 24.0,
+                icon: Icon(
+                  Icons.exit_to_app,
+                  color: Colors.grey[600],
+                ),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+              Padding(
+                padding: EdgeInsets.all(5.0),
+              )
+            ]),
+        body: widget.userData.savedContacts == []
+            ? _buildContactList()
+            : Container(
+                padding: EdgeInsets.all(50.0),
+                child: Text(
+                  "You currently have no contacts\n\nTap the top left icon to search for people you know",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 16.0, color: Colors.grey[600]),
+                )));
   }
 }

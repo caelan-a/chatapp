@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'login_background.dart';
 import 'screen_login.dart';
 
-void main() => runApp(MyApp());
+void main() => runApp(Main());
 
 const Map<int, Color> orangeGradients = {
   50: Color(0xFFFF9844),
@@ -17,7 +17,17 @@ const Map<int, Color> orangeGradients = {
   900: Color(0xFFFD7267),
 };
 
-class MyApp extends StatelessWidget {
+class Main extends StatelessWidget {
+  static void toScreen(BuildContext context, Widget screen) {
+    Navigator.push(context, MaterialPageRoute(builder: (context) => screen));
+  }
+
+  static void popScreens(BuildContext context, int count) {
+    for (var i = 0; i < count; i++) {
+      Navigator.pop(context);
+    }
+  }
+
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {

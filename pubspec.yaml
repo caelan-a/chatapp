@@ -50,6 +50,7 @@ flutter:
    - assets/chat_app.png
    - assets/0.jpg
    - assets/call_background.jpg
+   - assets/edit_image.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
