@@ -24,7 +24,7 @@ class _ContactSearchScreenState extends State<ContactSearchScreen> {
   List<Contact> contactsToShow = [];
 
   Future<void> searchContacts(String searchString) async {
-    setState((){
+    setState(() {
       loading = true;
     });
     return Database.searchContacts(searchController.text)
@@ -53,7 +53,9 @@ class _ContactSearchScreenState extends State<ContactSearchScreen> {
   }
 
   Widget _buildContactList() {
-contactsToShow.map((Contact contact) {
+    List<Widget> tiles;
+
+    tiles.addAll(contactsToShow.map((Contact contact) {
       return Column(children: <Widget>[
         _buildContactTile(contact.username, contact.avatarURL,
             contact.lastContacted, contact.requestSent),
@@ -64,7 +66,7 @@ contactsToShow.map((Contact contact) {
           ),
         )
       ]);
-    });
+    }));
 
     return ListView(children: tiles);
   }
@@ -143,7 +145,7 @@ contactsToShow.map((Contact contact) {
             onEditingComplete: () async {
               searchContacts(searchController.text).then((v) {
                 setState(() {
-                  loading=false;
+                  loading = false;
                 });
               });
             },
