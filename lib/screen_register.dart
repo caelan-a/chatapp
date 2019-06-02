@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'login_background.dart';
 import 'screen_contacts.dart';
+import 'main.dart';
 
 class RegisterScreen extends StatefulWidget {
   RegisterScreen({Key key}) : super(key: key);
@@ -14,11 +15,39 @@ class _RegisterScreenState extends State<RegisterScreen>
   FocusNode noneFN = FocusNode();
   FocusNode usernameFN = FocusNode();
   FocusNode passwordFN = FocusNode();
-  FocusNode emailFN = FocusNode();
+  FocusNode nameFN = FocusNode();
+
+  String avatarPath;
+
+  TextEditingController usernameTextController = TextEditingController();
+  TextEditingController passwordTextController = TextEditingController();
+  TextEditingController nameTextController = TextEditingController();
 
   void register() {
-    Navigator.of(context, rootNavigator: true)
-        .push(MaterialPageRoute(builder: (context) => ContactsScreen()));
+    
+  }
+
+  String getAvatarImagePath() {
+    return "";
+  }
+
+  Widget _buildEditImage() {
+    return IconButton(
+      onPressed: () {
+        setState(() {
+          avatarPath = getAvatarImagePath();
+        });
+      },
+      icon: ClipRRect(
+        borderRadius: BorderRadius.circular(30.0),
+        child: Image.asset(
+          avatarPath == "" ? "assets/edit_image.jpg" : avatarPath,
+          fit: BoxFit.cover,
+          height: 35.0,
+          width: 35.0,
+        ),
+      ),
+    );
   }
 
   Widget _buildRegisterForm() {
@@ -31,6 +60,7 @@ class _RegisterScreenState extends State<RegisterScreen>
           children: <Widget>[
             Container(
               child: TextFormField(
+                controller: usernameTextController,
                 textInputAction: TextInputAction.next,
                 decoration: InputDecoration(
                     hintText: 'Username',
@@ -45,19 +75,20 @@ class _RegisterScreenState extends State<RegisterScreen>
             Container(
               child: TextFormField(
                   textInputAction: TextInputAction.next,
+                  controller: passwordTextController,
                   decoration: InputDecoration(labelText: 'Password'),
                   keyboardType: TextInputType.emailAddress,
                   focusNode: passwordFN,
                   onFieldSubmitted: (text) {
-                    FocusScope.of(context).requestFocus(emailFN);
+                    FocusScope.of(context).requestFocus(nameFN);
                   }),
             ),
             Container(
               child: TextFormField(
                   textInputAction: TextInputAction.next,
-                  decoration: InputDecoration(labelText: 'Email'),
+                  decoration: InputDecoration(labelText: 'Name'),
                   keyboardType: TextInputType.emailAddress,
-                  focusNode: emailFN,
+                  focusNode: nameFN,
                   onFieldSubmitted: (text) {
                     FocusScope.of(context).requestFocus(noneFN);
                   }),
@@ -86,10 +117,12 @@ class _RegisterScreenState extends State<RegisterScreen>
         alignment: AlignmentDirectional.center,
         children: <Widget>[
           Positioned(
-            top: MediaQuery.of(context).size.height/4,
+              top: MediaQuery.of(context).size.height / 4,
               child: Text("Register",
                   style: TextStyle(
-                      color: Theme.of(context).primaryColor, fontSize: 34.0, fontWeight: FontWeight.bold))),
+                      color: Theme.of(context).primaryColor,
+                      fontSize: 34.0,
+                      fontWeight: FontWeight.bold))),
           _buildRegisterForm(),
         ],
       ),
