@@ -19,8 +19,10 @@ class UserData {
     if (!savedContacts.contains(contact)) {
       savedContacts.add(contact);
     }
+
+    
     prefs.setStringList(username + "_contacts",
-        savedContacts.map((c) => jsonEncode(c.toJson())));
+        savedContacts.map((c) => jsonEncode(c.toJson())).toList());
   }
 
   static Future<List<Contact>> loadContacts(String username) async {
@@ -45,7 +47,9 @@ class UserData {
     return prefs.containsKey(username);
   }
 
-  static void saveUserData(UserData user) {}
+  static void saveUserData(UserData user) {
+
+  }
 
   static void registerUser(String username, String visibleName,
       String authHeader, String avatarPath) async {
@@ -57,7 +61,7 @@ class UserData {
 
     List<Contact> contacts = [];
     prefs.setStringList(
-        username + "_contacts", contacts.map((c) => jsonEncode(c.toJson())));
+        username + "_contacts", contacts.map((c) => jsonEncode(c.toJson())).toList());
   }
 
   static Future<UserData> getUser(String username, String authHeader) async {
