@@ -18,11 +18,11 @@ environment:
 
 dependencies:
   image_picker:
-  flutter_webrtc:
-    path: ../_plugins/flutter-webrtc
+  flutter_webrtc: ^0.1.7
   cached_network_image: ^0.8.0
   intl:
   shared_preferences: ^0.5.2+1
+  
   flutter:
     sdk: flutter
 

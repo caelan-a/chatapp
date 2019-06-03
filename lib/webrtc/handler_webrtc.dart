@@ -59,7 +59,7 @@ class RTCUserDetailsMessage {
 class RTCHandler {
   String serverIp;
   Signaling _signaling; // used to communicate and listen to server
-  Function onIncomingCall;
+  Function(String, String, String) onIncomingCall;
   Function onEndCall;
   List<dynamic> _peers;
   var _selfId;
@@ -67,7 +67,7 @@ class RTCHandler {
 
   RTCDataChannel _dataChannel;
 
-  RTCHandler(String serverIp, UserData userData, Function onIncomingCall,
+  RTCHandler(String serverIp, UserData userData, Function(String, String, String) onIncomingCall,
       Function onEndCall) {
     this.userData = userData;
     this.serverIp = serverIp;
@@ -79,11 +79,11 @@ class RTCHandler {
     _signaling.switchCamera();
   }
 
-  void invitePeerToMessage(peerId, use_screen) async {
-    if (_signaling != null && peerId != _selfId) {
-      _signaling.invite(peerId, 'data', use_screen);
-    }
-  }
+    // void invitePeerToMessage(peerId, use_screen) async {
+    //   if (_signaling != null && peerId != _selfId) {
+    //     _signaling.invite(peerId, 'data', use_screen);
+    //   }
+    // }
 
   void hangUp() {
     if (_signaling != null) {
@@ -125,10 +125,10 @@ class RTCHandler {
     _dataChannel.send(RTCDataChannelMessage(userDetailsMessage));
   }
 
-  void sendCallRequest(String peerId, bool use_screen) {
-    invitePeerToMessage(peerId, use_screen);
-    sendUserDetails();
-  }
+  // void sendCallRequest(String peerId, bool use_screen) {
+  //   invitePeerToMessage(peerId, use_screen);
+  //   sendUserDetails();
+  // }
 
   void handleMessage(String messageStr) {
     Map<String, dynamic> json = jsonDecode(messageStr);
@@ -139,9 +139,9 @@ class RTCHandler {
     }
   }
 
-  void connectToServer(String serverIP, String displayName) {
+  void connectToServer(String serverIP, String displayName, String username) {
     if (_signaling == null) {
-      _signaling = new Signaling(serverIP, displayName)..connect();
+      _signaling = new Signaling(serverIP, displayName,username)..connect();
 
       //  setup messaging
       //  format is json
@@ -160,7 +160,7 @@ class RTCHandler {
       _signaling.onStateChange = (SignalingState state) {
         switch (state) {
           case SignalingState.CallStateNew:
-            onIncomingCall();
+            // onIncomingCall();
             break;
           case SignalingState.CallStateBye:
             onEndCall();
@@ -171,6 +171,9 @@ class RTCHandler {
             // });
             break;
           case SignalingState.CallStateInvite:
+            //  Received invite
+            
+          break;  
           case SignalingState.CallStateConnected:
           case SignalingState.CallStateRinging:
           case SignalingState.ConnectionClosed:

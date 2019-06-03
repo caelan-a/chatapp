@@ -20,7 +20,9 @@ class _ContactsScreenState extends State<ContactsScreen> {
 
   @override
   void initState() {
-    Function onIncomingCall = () {
+    Function onIncomingCall = (String visibleName, String username, String avatarBase64) {
+
+    
       // Main.toScreen(context,  CallScreen(
       //         contact: contact,
       //         userData: widget.userData,
