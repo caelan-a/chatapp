@@ -17,7 +17,8 @@ environment:
   sdk: ">=2.1.0 <3.0.0"
 
 dependencies:
-  flutter_webrtc: 
+  image_picker:
+  flutter_webrtc: 0.1.7
   cached_network_image: ^0.8.0
   intl:
   shared_preferences: ^0.5.2+1

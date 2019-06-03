@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'login_background.dart';
+import 'package:image_picker/image_picker.dart';
 import 'screen_contacts.dart';
 import 'main.dart';
+import 'dart:io';
 
 class RegisterScreen extends StatefulWidget {
   RegisterScreen({Key key}) : super(key: key);
@@ -17,36 +19,57 @@ class _RegisterScreenState extends State<RegisterScreen>
   FocusNode passwordFN = FocusNode();
   FocusNode nameFN = FocusNode();
 
-  String avatarPath;
+  String avatarPath = "";
 
   TextEditingController usernameTextController = TextEditingController();
   TextEditingController passwordTextController = TextEditingController();
   TextEditingController nameTextController = TextEditingController();
 
-  void register() {
-    
-  }
+  void register() {}
 
-  String getAvatarImagePath() {
-    return "";
+  Future getAvatarImagePath() async {
+    File image = await ImagePicker.pickImage(source: ImageSource.gallery);
+
+    setState(() {
+      avatarPath = image.path;
+    });
   }
 
   Widget _buildEditImage() {
     return IconButton(
       onPressed: () {
         setState(() {
-          avatarPath = getAvatarImagePath();
+          getAvatarImagePath();
         });
       },
-      icon: ClipRRect(
-        borderRadius: BorderRadius.circular(30.0),
-        child: Image.asset(
-          avatarPath == "" ? "assets/edit_image.jpg" : avatarPath,
-          fit: BoxFit.cover,
-          height: 35.0,
-          width: 35.0,
-        ),
-      ),
+      iconSize: 120.0,
+      icon: avatarPath != ""
+          ? ClipRRect(
+              borderRadius: BorderRadius.circular(100.0),
+              child: Image.asset(
+                avatarPath,
+                fit: BoxFit.cover,
+                // height: 60.0,
+                // width: 100.0,
+              ))
+          : Container(
+              padding: EdgeInsets.all(10.0),
+              decoration: new BoxDecoration(
+                borderRadius: new BorderRadius.circular(100.0),
+                border: new Border.all(
+                  width: 3.0,
+                  color: Colors.grey[400],
+                ),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(30.0),
+                child: Icon(
+                  Icons.person,
+                  size: 70.0,
+                  color: Colors.grey[400],
+                ),
+              ),
+            ),
     );
   }
 
@@ -54,10 +77,11 @@ class _RegisterScreenState extends State<RegisterScreen>
     return Form(
       child: Container(
         padding: EdgeInsets.fromLTRB(
-            60.0, MediaQuery.of(context).size.height / 2.8, 60.0, 0.0),
+            60.0, MediaQuery.of(context).size.height / 3.75, 60.0, 0.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
+            _buildEditImage(),
             Container(
               child: TextFormField(
                 controller: usernameTextController,
@@ -117,7 +141,7 @@ class _RegisterScreenState extends State<RegisterScreen>
         alignment: AlignmentDirectional.center,
         children: <Widget>[
           Positioned(
-              top: MediaQuery.of(context).size.height / 4,
+              top: MediaQuery.of(context).size.height / 6,
               child: Text("Register",
                   style: TextStyle(
                       color: Theme.of(context).primaryColor,

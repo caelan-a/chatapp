@@ -28,10 +28,6 @@ class _VideoWindowState extends State<VideoWindow>
     super.initState();
   }
 
-  void onEndCall() {
-    Navigator.of(context).pop();
-  }
-
   Widget _buildCallingScreen() {
     return Container(
       decoration: BoxDecoration(
@@ -98,7 +94,7 @@ class _VideoWindowState extends State<VideoWindow>
                       borderRadius: new BorderRadius.circular(30.0)),
                   textColor: Colors.white,
                   onPressed: () {
-                    onEndCall();
+                    // onEndCall();
                   },
                   color: Colors.white,
                   child: Row(

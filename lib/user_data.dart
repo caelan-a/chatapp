@@ -10,6 +10,7 @@ class UserData {
   String avatarPath;
   String authHeader;
   List<Contact> savedContacts;
+  String serverIP = "192.168.1.93:8086";
 
   UserData(
       {this.username, this.authHeader, this.savedContacts, this.visibleName}) {}

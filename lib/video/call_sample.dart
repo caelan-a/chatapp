@@ -3,13 +3,26 @@ import 'dart:io';
 import 'dart:core';
 import 'signaling.dart';
 import 'package:flutter_webrtc/webrtc.dart';
+import '../user_data.dart';
+import '../contact.dart';
+import '../pulsating_market.dart';
+
+const textStyle = TextStyle(
+    fontSize: 12.0,
+    color: Colors.white,
+    fontFamily: 'OpenSans',
+    fontWeight: FontWeight.w600);
+
 
 class CallSample extends StatefulWidget {
   static String tag = 'call_sample';
-
   final String ip;
+  UserData userData;
+  Contact contact;
+  TabController tabController;
 
-  CallSample({Key key, @required this.ip}) : super(key: key);
+
+  CallSample({Key key, @required this.ip, @required this.userData, @required this.contact, @required this.tabController}) : super(key: key);
 
   @override
   _CallSampleState createState() => new _CallSampleState(serverIP: ip);
@@ -17,8 +30,7 @@ class CallSample extends StatefulWidget {
 
 class _CallSampleState extends State<CallSample> {
   Signaling _signaling;
-  String _displayName =
-      Platform.localHostname + '(' + Platform.operatingSystem + ")";
+  String _displayName;
   List<dynamic> _peers;
   var _selfId;
   RTCVideoRenderer _localRenderer = new RTCVideoRenderer();
@@ -28,9 +40,108 @@ class _CallSampleState extends State<CallSample> {
 
   _CallSampleState({Key key, @required this.serverIP});
 
+  Widget _buildCallingScreen() {
+    return Container(
+      decoration: BoxDecoration(
+          image: DecorationImage(
+              image: AssetImage(
+                "assets/call_background.jpg",
+              ),
+              fit: BoxFit.cover)),
+      child: Stack(
+        alignment: AlignmentDirectional.center,
+        children: <Widget>[
+          Positioned(
+            top: MediaQuery.of(context).size.height / 4.2,
+            child: Stack(
+              alignment: AlignmentDirectional.center,
+              children: <Widget>[
+                PulsatingMarker(
+                  screenPosition: Offset(0, 0),
+                  scale: 0.13,
+                  color: Colors.white,
+                  radius: 50.0,
+                ),
+                ClipRRect(
+                  clipBehavior: Clip.antiAliasWithSaveLayer,
+                  borderRadius: BorderRadius.circular(150.0),
+                  child: widget.contact.avatarURL != ""
+                      ? Image.asset(
+                          widget.contact.avatarURL,
+                          fit: BoxFit.cover,
+                          // height: 60.0,
+                          // width: 100.0,
+                        )
+                      : Icon(
+                          Icons.person,
+                          color: Colors.white,
+                          size: 100.0,
+                        ),
+                ),
+              ],
+            ),
+          ),
+          Positioned(
+            top: MediaQuery.of(context).size.height / 1.55,
+            child: Text(
+              "Connecting with..",
+              style: textStyle,
+            ),
+          ),
+          Positioned(
+            top: MediaQuery.of(context).size.height / 1.45,
+            child: Text(
+              widget.contact.visibleName,
+              style: textStyle.copyWith(fontSize: 32.0),
+            ),
+          ),
+          Positioned(
+            top: MediaQuery.of(context).size.height / 1.25,
+            child: Padding(
+                padding: const EdgeInsets.all(0.0),
+                child: OutlineButton(
+                  borderSide: BorderSide(color: Colors.white),
+                  shape: new RoundedRectangleBorder(
+                      side: BorderSide(color: Colors.white),
+                      borderRadius: new BorderRadius.circular(30.0)),
+                  textColor: Colors.white,
+                  onPressed: () {
+
+                  },
+                  color: Colors.white,
+                  child: Row(
+                    children: <Widget>[
+                      Icon(Icons.call_end),
+                      Text("   End Call"),
+                    ],
+                  ),
+                )),
+          ),
+          Positioned(
+            left: 20.0,
+            top: 20.0,
+            child: IconButton(
+              icon: Icon(Icons.message),
+              color: Colors.white,
+              onPressed: () {
+                setState(() {
+                  widget.tabController.animateTo(0);
+                });
+              },
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
   @override
   initState() {
     super.initState();
+
+    _displayName = widget.userData.visibleName;
+    _selfId = "@" + widget.userData.username;
+
     initRenderers();
     _connect();
   }

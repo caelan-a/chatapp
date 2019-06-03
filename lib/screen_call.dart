@@ -6,13 +6,19 @@ import 'pulsating_market.dart';
 import 'chat/window_chat.dart';
 import 'video/window_video.dart';
 import 'user_data.dart';
+import 'video/call_sample.dart';
 
 class CallScreen extends StatefulWidget {
   final Contact contact;
   UserData userData;
   int initialTab;
 
-  CallScreen({Key key, @required this.contact, @required this.userData, this.initialTab = 0}) : super(key: key);
+  CallScreen(
+      {Key key,
+      @required this.contact,
+      @required this.userData,
+      this.initialTab = 0})
+      : super(key: key);
 
   @override
   _CallScreenState createState() => _CallScreenState();
@@ -25,7 +31,8 @@ class _CallScreenState extends State<CallScreen>
 
   @override
   void initState() {
-    tabController = TabController(initialIndex: widget.initialTab, length: 2, vsync: this);
+    tabController =
+        TabController(initialIndex: widget.initialTab, length: 2, vsync: this);
     super.initState();
   }
 
@@ -68,9 +75,11 @@ class _CallScreenState extends State<CallScreen>
               peer: widget.contact,
               userData: widget.userData,
             ),
-            VideoWindow(
+            CallSample(
               contact: widget.contact,
               tabController: tabController,
+              ip: "192.168.1.93",
+              userData: widget.userData,
             ),
           ],
         ),
