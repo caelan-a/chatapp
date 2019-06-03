@@ -4,9 +4,9 @@ import 'screen_contacts.dart';
 import 'contact.dart';
 import 'pulsating_market.dart';
 import 'chat/window_chat.dart';
-import 'video/window_video.dart';
+import 'webrtc/window_video.dart';
 import 'user_data.dart';
-import 'video/call_sample.dart';
+import 'webrtc/window_video.dart';
 
 class CallScreen extends StatefulWidget {
   final Contact contact;
@@ -75,11 +75,12 @@ class _CallScreenState extends State<CallScreen>
               peer: widget.contact,
               userData: widget.userData,
             ),
-            CallSample(
+            VideoCallScreen(
               contact: widget.contact,
               tabController: tabController,
               ip: "192.168.1.93",
               userData: widget.userData,
+              outgoing: true,
             ),
           ],
         ),

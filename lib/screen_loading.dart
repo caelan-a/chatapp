@@ -68,7 +68,7 @@ class LoadingScreenState extends State<LoadingScreen> with SingleTickerProviderS
                   style: Theme.of(context)
                       .primaryTextTheme
                       .body1
-                      .copyWith(fontSize: 16.0)),
+                      .copyWith(fontSize: 16.0, color: Colors.grey[600])),
               CircularProgressIndicator(
                 valueColor: AlwaysStoppedAnimation<Color>(
                     Theme.of(context).primaryColor),

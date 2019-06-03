@@ -17,6 +17,26 @@ class ContactsScreen extends StatefulWidget {
 }
 
 class _ContactsScreenState extends State<ContactsScreen> {
+
+  @override
+  void initState() {
+    Function onIncomingCall = () {
+      // Main.toScreen(context,  CallScreen(
+      //         contact: contact,
+      //         userData: widget.userData,
+      //         initialTab: 1,
+      //       ) )
+    };
+
+    Function onEndCall() {
+      widget.userData.rtcHandler.hangUp();
+      print("End Call");
+    }
+
+    widget.userData.registerWithRTCServer(onIncomingCall, onEndCall);
+    super.initState();
+  }
+
   void callContact(Contact contact) {
     print("Call contact");
     Navigator.of(context, rootNavigator: true).push(MaterialPageRoute(

@@ -3,6 +3,9 @@ import 'database.dart';
 import 'contact.dart';
 import 'dart:io';
 import 'dart:convert';
+import 'webrtc/handler_webrtc.dart';
+
+const String SERVER_IP = "192.168.1.92";
 
 class UserData {
   String visibleName;
@@ -10,17 +13,27 @@ class UserData {
   String avatarPath;
   String authHeader;
   List<Contact> savedContacts;
-  String serverIP = "192.168.1.93:8086";
+
+  RTCHandler rtcHandler; // used to communicate and listen to server
 
   UserData(
       {this.username, this.authHeader, this.savedContacts, this.visibleName}) {}
 
+  void registerWithRTCServer(Function onIncomingCall, Function onEndCall) {
+    rtcHandler = RTCHandler(SERVER_IP, this, onIncomingCall, onEndCall);
+  }
+
+  String getBase64Avatar() {
+    return "avatarBase64";
+  }
+
   void deleteContact(Contact contact) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    
+
     print("Delete contact");
     savedContacts.remove(contact);
-    List<String> strList =   savedContacts.map((c) => jsonEncode(c.toJson())).toList();  
+    List<String> strList =
+        savedContacts.map((c) => jsonEncode(c.toJson())).toList();
     prefs.setStringList(username + "_contacts", strList);
   }
 
@@ -31,12 +44,13 @@ class UserData {
     }
 
     print("Saving contacts");
-    List<String> strList =   savedContacts.map((c) => jsonEncode(c.toJson())).toList();  
+    List<String> strList =
+        savedContacts.map((c) => jsonEncode(c.toJson())).toList();
     prefs.setStringList(username + "_contacts", strList);
-
   }
 
-  static Future<List<Contact>> loadContacts(String username, SharedPreferences prefs) async {
+  static Future<List<Contact>> loadContacts(
+      String username, SharedPreferences prefs) async {
     List<String> listStr = prefs.getStringList(username + "_contacts");
 
     if (listStr == null) {
@@ -53,9 +67,7 @@ class UserData {
     return prefs.containsKey(username);
   }
 
-  static void saveUserData(UserData user) {
-
-  }
+  static void saveUserData(UserData user) {}
 
   static void registerUser(String username, String visibleName,
       String authHeader, String avatarPath) async {
@@ -66,8 +78,8 @@ class UserData {
     prefs.setString(username + "_authHeader", authHeader);
 
     List<Contact> contacts = [];
-    prefs.setStringList(
-        username + "_contacts", contacts.map((c) => jsonEncode(c.toJson())).toList());
+    prefs.setStringList(username + "_contacts",
+        contacts.map((c) => jsonEncode(c.toJson())).toList());
   }
 
   static Future<UserData> getUser(String username, String authHeader) async {
