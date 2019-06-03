@@ -138,9 +138,7 @@ class _ContactSearchScreenState extends State<ContactSearchScreen> {
             ],
           ),
           trailing: IconButton(
-            onPressed: () {
-              sendFriendRequest(contact);
-            },
+            onPressed: () => !requestSent ? sendFriendRequest(contact) : null,
             icon: requestSent
                 ? Icon(
                     Icons.check,

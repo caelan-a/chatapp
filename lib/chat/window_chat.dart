@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'message.dart';
 import '../contact.dart';
 import 'package:flutter/scheduler.dart';
+import '../user_data.dart';
 
 class ChatWindow extends StatefulWidget {
   TabController parentTabController;
@@ -14,14 +15,13 @@ class ChatWindow extends StatefulWidget {
   final Color localUserColor = Colors.blue[300];
   final Color remoteUserCOlor = Colors.green[300];
 
-  ChatWindow({@required this.groupChatId, @required this.parentTabController}) {
-    localUser = Contact(username: "Caelan", avatarURL: "", lastContacted: DateTime.now());
-    peer = Contact(
-        username: "John",
-        avatarURL:
-            "https://media.licdn.com/dms/image/C5603AQEPfzcv_X-kcw/profile-displayphoto-shrink_200_200/0?e=1564012800&v=beta&t=cxHyt4d9MIFI8y2SML3cdkjdplS5Ig8AuwI7MsP5qD0",
-        lastContacted: DateTime.now());
-  }
+  ChatWindow(
+      {@required this.groupChatId,
+      @required this.parentTabController,
+      @required this.peer,
+      @required userData}) {
+        this.localUser = Contact(username: userData.username, visibleName: userData.visibleName);
+      }
 
   @override
   State createState() => _ChatWindowState();
@@ -117,7 +117,7 @@ class _ChatWindowState extends State<ChatWindow> with TickerProviderStateMixin {
           },
         ),
         title: Text(
-          widget.peer.username,
+          widget.peer.visibleName,
           style: TextStyle(color: Colors.grey[600]),
         ),
         actions: <Widget>[
@@ -125,7 +125,7 @@ class _ChatWindowState extends State<ChatWindow> with TickerProviderStateMixin {
             icon: Icon(Icons.videocam),
             color: Colors.grey[600],
             onPressed: () {
-                widget.parentTabController.animateTo(VIDEO_WINDOW_TAB_INDEX);
+              widget.parentTabController.animateTo(VIDEO_WINDOW_TAB_INDEX);
             },
           ),
         ],
@@ -160,7 +160,8 @@ class _ChatWindowState extends State<ChatWindow> with TickerProviderStateMixin {
           ? Container(
               child: Center(
                 child: CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).primaryColor)),
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                        Theme.of(context).primaryColor)),
               ),
               color: Colors.white.withOpacity(0.8),
             )
@@ -194,6 +195,7 @@ class _ChatWindowState extends State<ChatWindow> with TickerProviderStateMixin {
                 onChanged: (s) {
                   setState(() {});
                 },
+                enabled: widget.peer.accepted,
                 style: TextStyle(color: Colors.grey[800], fontSize: 15.0),
                 controller: textEditingController,
                 decoration: InputDecoration.collapsed(
@@ -237,7 +239,7 @@ class _ChatWindowState extends State<ChatWindow> with TickerProviderStateMixin {
               child: CircularProgressIndicator(
                   valueColor: AlwaysStoppedAnimation<Color>(
                       Theme.of(context).primaryColor)))
-          : ListView.builder(
+          : widget.peer.accepted ? ListView.builder(
               padding: EdgeInsets.all(10.0),
               controller: listScrollController,
               itemCount: messageList.length,
@@ -265,7 +267,14 @@ class _ChatWindowState extends State<ChatWindow> with TickerProviderStateMixin {
                       isUsersLastMessage(fromContact.username, index),
                 );
               },
-            ),
+            ) : Container(
+              alignment: AlignmentDirectional.center,
+                  padding: EdgeInsets.all(50.0),
+                  child: Text(
+                    "User is still waiting to accept your request\n\nMessages cannot be sent until then",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 16.0, color: Colors.grey[600]),
+                  )),
     );
   }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'pulsating_market.dart';
 import 'contact.dart';
+import 'package:flutter_webrtc/webrtc.dart';
 
 const textStyle = TextStyle(
     fontSize: 12.0,
@@ -31,8 +32,7 @@ class _VideoWindowState extends State<VideoWindow>
     Navigator.of(context).pop();
   }
 
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildCallingScreen() {
     return Container(
       decoration: BoxDecoration(
           image: DecorationImage(
@@ -57,11 +57,18 @@ class _VideoWindowState extends State<VideoWindow>
                 ClipRRect(
                   clipBehavior: Clip.antiAliasWithSaveLayer,
                   borderRadius: BorderRadius.circular(150.0),
-                  child: Image.network(
-                    widget.contact.avatarURL,
-                    fit: BoxFit.cover,
-                    scale: 1.5,
-                  ),
+                  child: widget.contact.avatarURL != ""
+                      ? Image.asset(
+                          widget.contact.avatarURL,
+                          fit: BoxFit.cover,
+                          // height: 60.0,
+                          // width: 100.0,
+                        )
+                      : Icon(
+                          Icons.person,
+                          color: Colors.white,
+                          size: 100.0,
+                        ),
                 ),
               ],
             ),
@@ -76,7 +83,7 @@ class _VideoWindowState extends State<VideoWindow>
           Positioned(
             top: MediaQuery.of(context).size.height / 1.45,
             child: Text(
-              widget.contact.username,
+              widget.contact.visibleName,
               style: textStyle.copyWith(fontSize: 32.0),
             ),
           ),
@@ -103,20 +110,25 @@ class _VideoWindowState extends State<VideoWindow>
                 )),
           ),
           Positioned(
-                left: 20.0,
-                top: 20.0,
-                child: IconButton(
-                  icon: Icon(Icons.message),
-                  color: Colors.white,
-                  onPressed: () {
-                    setState(() {
-                      widget.tabController.animateTo(0);
-                    });
-                  },
-                ),
-              )
+            left: 20.0,
+            top: 20.0,
+            child: IconButton(
+              icon: Icon(Icons.message),
+              color: Colors.white,
+              onPressed: () {
+                setState(() {
+                  widget.tabController.animateTo(0);
+                });
+              },
+            ),
+          )
         ],
       ),
     );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _buildCallingScreen();
   }
 }

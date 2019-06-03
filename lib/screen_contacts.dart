@@ -22,6 +22,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
     Navigator.of(context, rootNavigator: true).push(MaterialPageRoute(
         builder: (context) => CallScreen(
               contact: contact,
+              userData: widget.userData,
               initialTab: 1,
             )));
   }
@@ -29,7 +30,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
   void messageContact(Contact contact) {
     print("Call contact");
     Navigator.of(context, rootNavigator: true).push(
-        MaterialPageRoute(builder: (context) => CallScreen(contact: contact)));
+        MaterialPageRoute(builder: (context) => CallScreen(contact: contact, userData: widget.userData,)));
   }
 
   static void showLogOutWarning(BuildContext context) {
@@ -126,7 +127,6 @@ class _ContactsScreenState extends State<ContactsScreen> {
     return Container(
       padding: EdgeInsets.fromLTRB(10.0, 0.0, 10.0, 0.0),
       child: ListTile(
-        enabled: false,
         onLongPress: () {
           showDeleteContactWarning(context, contact);
         },
@@ -207,7 +207,6 @@ class _ContactsScreenState extends State<ContactsScreen> {
             ),
           ],
         ),
-        onTap: () => onCall(),
       ),
     );
   }

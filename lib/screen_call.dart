@@ -5,12 +5,14 @@ import 'contact.dart';
 import 'pulsating_market.dart';
 import 'chat/window_chat.dart';
 import 'window_video.dart';
+import 'user_data.dart';
 
 class CallScreen extends StatefulWidget {
   final Contact contact;
+  UserData userData;
   int initialTab;
 
-  CallScreen({Key key, @required this.contact, this.initialTab = 0}) : super(key: key);
+  CallScreen({Key key, @required this.contact, @required this.userData, this.initialTab = 0}) : super(key: key);
 
   @override
   _CallScreenState createState() => _CallScreenState();
@@ -63,6 +65,8 @@ class _CallScreenState extends State<CallScreen>
             ChatWindow(
               parentTabController: tabController,
               groupChatId: "test",
+              peer: widget.contact,
+              userData: widget.userData,
             ),
             VideoWindow(
               contact: widget.contact,
