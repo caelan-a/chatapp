@@ -77,9 +77,9 @@ packages:
   flutter_webrtc:
     dependency: "direct main"
     description:
-      name: flutter_webrtc
-      url: "https://pub.dartlang.org"
-    source: hosted
+      path: "..\\_plugins\\flutter-webrtc"
+      relative: true
+    source: path
     version: "0.1.7"
   http:
     dependency: transitive
