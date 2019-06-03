@@ -54,9 +54,14 @@ class _ContactSearchScreenState extends State<ContactSearchScreen> {
           String username = c.username;
 
           bool isNewContact = true;
+
+          if(username == "@" + widget.userData.username) {
+            isNewContact = false;
+          }
+          
           widget.userData.savedContacts.forEach((Contact localC) {
             String localCUsername = localC.username;
-
+            print("User: $c");
             if (localCUsername == username) {
               isNewContact = false;
               contactsToShow.add(localC);

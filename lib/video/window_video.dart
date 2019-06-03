@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'pulsating_market.dart';
-import 'contact.dart';
+import '../pulsating_market.dart';
+import '../contact.dart';
 import 'package:flutter_webrtc/webrtc.dart';
 
 const textStyle = TextStyle(

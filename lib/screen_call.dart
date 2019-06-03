@@ -4,7 +4,7 @@ import 'screen_contacts.dart';
 import 'contact.dart';
 import 'pulsating_market.dart';
 import 'chat/window_chat.dart';
-import 'window_video.dart';
+import 'video/window_video.dart';
 import 'user_data.dart';
 
 class CallScreen extends StatefulWidget {
