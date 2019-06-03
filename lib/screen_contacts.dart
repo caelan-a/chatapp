@@ -19,8 +19,78 @@ class ContactsScreen extends StatefulWidget {
 class _ContactsScreenState extends State<ContactsScreen> {
   void callContact(Contact contact) {
     print("Call contact");
+    Navigator.of(context, rootNavigator: true).push(MaterialPageRoute(
+        builder: (context) => CallScreen(
+              contact: contact,
+              initialTab: 1,
+            )));
+  }
+
+  void messageContact(Contact contact) {
+    print("Call contact");
     Navigator.of(context, rootNavigator: true).push(
         MaterialPageRoute(builder: (context) => CallScreen(contact: contact)));
+  }
+
+  static void showLogOutWarning(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        // return object of type Dialog
+        return AlertDialog(
+          contentPadding: EdgeInsets.fromLTRB(20.0, 20.0, 20.0, 00.0),
+          titlePadding: EdgeInsets.fromLTRB(20.0, 20.0, 20.0, 0.0),
+          title: Text("Logout"),
+          content: Text("Are you sure?"),
+          actions: <Widget>[
+            FlatButton(
+              child: new Text("Back"),
+              onPressed: () {
+                Main.popScreens(context, 1);
+              },
+            ),
+            FlatButton(
+              child: new Text("Logout"),
+              onPressed: () {
+                Main.popScreens(context, 3);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void showDeleteContactWarning(BuildContext context, Contact contact) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        // return object of type Dialog
+        return AlertDialog(
+          contentPadding: EdgeInsets.fromLTRB(20.0, 20.0, 20.0, 00.0),
+          titlePadding: EdgeInsets.fromLTRB(20.0, 20.0, 20.0, 0.0),
+          title: Text("Delete Contact"),
+          content:
+              Text("Are you sure you want to delete ${contact.visibleName}"),
+          actions: <Widget>[
+            FlatButton(
+              child: new Text("No"),
+              onPressed: () {
+                Main.popScreens(context, 1);
+              },
+            ),
+            FlatButton(
+              child: new Text("Yes"),
+              onPressed: () {
+                widget.userData.deleteContact(contact);
+                setState(() {});
+                Main.popScreens(context, 1);
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Widget _buildContactList() {
@@ -56,6 +126,10 @@ class _ContactsScreenState extends State<ContactsScreen> {
     return Container(
       padding: EdgeInsets.fromLTRB(10.0, 0.0, 10.0, 0.0),
       child: ListTile(
+        enabled: false,
+        onLongPress: () {
+          showDeleteContactWarning(context, contact);
+        },
         contentPadding: EdgeInsets.fromLTRB(10.0, 10.0, 10.0, 0.0),
         leading: ClipRRect(
             borderRadius: BorderRadius.circular(30.0),
@@ -80,7 +154,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            contact.lastContacted != null
+            contact.accepted == true
                 ? Container(
                     alignment: AlignmentDirectional.centerStart,
                     child: Text(
@@ -105,10 +179,33 @@ class _ContactsScreenState extends State<ContactsScreen> {
                   ),
           ],
         ),
-        trailing: Icon(
-          Icons.videocam,
-          color: Colors.grey[600],
-          size: 30.0,
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            IconButton(
+              onPressed: () {
+                messageContact(contact);
+              },
+              icon: Icon(
+                Icons.message,
+                color: Colors.grey[600],
+                size: 30.0,
+              ),
+            ),
+            // Padding(
+            // //   padding: EdgeInsets.all(10.0),
+            // // ),
+            IconButton(
+              onPressed: () {
+                callContact(contact);
+              },
+              icon: Icon(
+                Icons.call,
+                color: Colors.grey[600],
+                size: 30.0,
+              ),
+            ),
+          ],
         ),
         onTap: () => onCall(),
       ),
@@ -154,7 +251,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
                     color: Colors.grey[600],
                   ),
                   onPressed: () {
-                    Main.popScreens(context, 2);
+                    showLogOutWarning(context);
                   },
                 ),
                 Padding(

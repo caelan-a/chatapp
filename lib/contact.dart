@@ -3,16 +3,28 @@ class Contact {
   String visibleName;
   String avatarURL;
   bool requestSent = false;
-  DateTime lastContacted; // Change to datetime
+  bool accepted = false;
+  bool hasBeenCalled = false;
+  DateTime lastContacted = DateTime.now(); // Change to datetime
 
-  Contact({this.username, this.avatarURL = "", this.lastContacted, this.visibleName});
+  Contact(
+      {this.username,
+      this.avatarURL = "",
+      this.lastContacted,
+      this.requestSent = false,
+      this.accepted = false,
+      this.hasBeenCalled = false,
+      this.visibleName});
 
   Map<String, dynamic> toJson() {
     return {
-      "username" : username,
-      "avatar_url" : avatarURL,
-      "visible_name" : visibleName, 
-      "last_contacted" : lastContacted.toIso8601String(),
+      "username": username,
+      "avatar_url": avatarURL,
+      "visible_name": visibleName,
+      "last_contacted": lastContacted.toIso8601String(),
+      "request_sent": requestSent,
+      "accepted": accepted,
+      "has_been_called": hasBeenCalled,
     };
   }
 
@@ -20,7 +32,10 @@ class Contact {
     return Contact(
         username: json['username'],
         avatarURL: json['avatar_url'],
-        visibleName : json['visible_name'], 
+        visibleName: json['visible_name'],
+        requestSent: json['request_sent'],
+        accepted: json['accepted'],
+        hasBeenCalled: json['has_been_called'],
         lastContacted: DateTime.parse(json['last_contacted']));
   }
 }

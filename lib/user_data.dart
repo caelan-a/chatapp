@@ -14,29 +14,34 @@ class UserData {
   UserData(
       {this.username, this.authHeader, this.savedContacts, this.visibleName}) {}
 
+  void deleteContact(Contact contact) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    
+    print("Delete contact");
+    savedContacts.remove(contact);
+    List<String> strList =   savedContacts.map((c) => jsonEncode(c.toJson())).toList();  
+    prefs.setStringList(username + "_contacts", strList);
+  }
+
   void saveContact(Contact contact) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     if (!savedContacts.contains(contact)) {
       savedContacts.add(contact);
     }
 
-    
-    prefs.setStringList(username + "_contacts",
-        savedContacts.map((c) => jsonEncode(c.toJson())).toList());
+    print("Saving contacts");
+    List<String> strList =   savedContacts.map((c) => jsonEncode(c.toJson())).toList();  
+    prefs.setStringList(username + "_contacts", strList);
+
   }
 
-  static Future<List<Contact>> loadContacts(String username) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    print("CONTACTS");
-    print(prefs.getStringList(username + "_contacts"));
-    print("END");
+  static Future<List<Contact>> loadContacts(String username, SharedPreferences prefs) async {
+    List<String> listStr = prefs.getStringList(username + "_contacts");
 
-    List<String> contacts_str = prefs.getStringList(username + "_contacts");
-
-    if (contacts_str == null) {
+    if (listStr == null) {
       return [];
     } else {
-      return contacts_str
+      return listStr
           .map((rawJson) => Contact.fromJson(jsonDecode(rawJson)))
           .toList();
     }
@@ -70,14 +75,16 @@ class UserData {
     String visibleName = "";
     String avatarPath = "assets/edit_image.png";
     List<Contact> contacts = [];
-    registerUser("caelan", "Caelan Anderson", "IamcaelanUserxxxAuthxxxUnique",
-        "assets/0.jpg");
+
     //  local user exists
     if (await localUserExists(username)) {
+      print("Username exists");
       visibleName = prefs.getString(username + "_visibleName");
       avatarPath = prefs.getString(username + "_avatarPath");
-      contacts = await loadContacts(username);
+      contacts = await loadContacts(username, prefs);
+      print(contacts);
     } else {
+      print("New user");
       //  Get visibleName from search functionality
       registerUser(username, visibleName, authHeader, avatarPath);
     }

@@ -60,8 +60,9 @@ class Database {
 
     if (response['users'] != null) {
       (response['users'] as List).forEach((dynamic contact) {
+        print(DateTime.now().toIso8601String());
         returnedContacts.add(Contact(
-            username: contact['Username'], visibleName: contact['Name']));
+            username: contact['Username'], visibleName: contact['Name'], lastContacted: DateTime.now()));
       });
     } 
     print(response["users"]);
