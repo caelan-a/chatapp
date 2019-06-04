@@ -2,6 +2,7 @@ class Contact {
   String username;
   String visibleName;
   String avatarURL;
+  String avatarBase64;
   bool requestSent = false;
   bool accepted = false;
   bool hasBeenCalled = false;
@@ -11,6 +12,7 @@ class Contact {
       {this.username,
       this.avatarURL = "",
       this.lastContacted,
+      this.avatarBase64 = "",
       this.requestSent = false,
       this.accepted = false,
       this.hasBeenCalled = false,

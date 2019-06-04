@@ -12,11 +12,13 @@ class CallScreen extends StatefulWidget {
   final Contact contact;
   UserData userData;
   int initialTab;
+  bool outgoing;
 
   CallScreen(
       {Key key,
       @required this.contact,
       @required this.userData,
+      this.outgoing = false,
       this.initialTab = 0})
       : super(key: key);
 
@@ -78,9 +80,8 @@ class _CallScreenState extends State<CallScreen>
             VideoCallScreen(
               contact: widget.contact,
               tabController: tabController,
-              ip: "192.168.1.93",
               userData: widget.userData,
-              outgoing: true,
+              outgoing: widget.outgoing,
             ),
           ],
         ),

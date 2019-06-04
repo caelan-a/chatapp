@@ -6,6 +6,8 @@ import 'contact.dart';
 import 'user_data.dart';
 import 'main.dart';
 import 'package:chatapp/screen_contact_search.dart';
+import 'dart:convert';
+import 'dart:typed_data';
 
 class ContactsScreen extends StatefulWidget {
   UserData userData;
@@ -17,20 +19,26 @@ class ContactsScreen extends StatefulWidget {
 }
 
 class _ContactsScreenState extends State<ContactsScreen> {
-
   @override
   void initState() {
-    Function onIncomingCall = (String visibleName, String username, String avatarBase64) {
-
-    
-      // Main.toScreen(context,  CallScreen(
-      //         contact: contact,
-      //         userData: widget.userData,
-      //         initialTab: 1,
-      //       ) )
+    Function onIncomingCall =
+        (String visibleName, String username, String avatarBase64) {
+      Main.toScreen(
+          context,
+          CallScreen(
+            contact: Contact(
+              username: username,
+              visibleName: visibleName,
+              avatarBase64: avatarBase64,
+            ),
+            userData: widget.userData,
+            outgoing: false,
+            initialTab: 1,
+          ));
     };
 
     Function onEndCall() {
+      widget.userData.rtcHandler.disposeRenderers();
       widget.userData.rtcHandler.hangUp();
       print("End Call");
     }
@@ -41,18 +49,15 @@ class _ContactsScreenState extends State<ContactsScreen> {
 
   void callContact(Contact contact) {
     print("Call contact");
-    Navigator.of(context, rootNavigator: true).push(MaterialPageRoute(
-        builder: (context) => CallScreen(
-              contact: contact,
-              userData: widget.userData,
-              initialTab: 1,
-            )));
-  }
-
-  void messageContact(Contact contact) {
-    print("Call contact");
-    Navigator.of(context, rootNavigator: true).push(
-        MaterialPageRoute(builder: (context) => CallScreen(contact: contact, userData: widget.userData,)));
+    widget.userData.rtcHandler.makeCall("366320", 'video', false);
+    Main.toScreen(
+        context,
+        CallScreen(
+          contact: contact,
+          userData: widget.userData,
+          outgoing: true,
+          initialTab: 1,
+        ));
   }
 
   static void showLogOutWarning(BuildContext context) {
@@ -149,87 +154,84 @@ class _ContactsScreenState extends State<ContactsScreen> {
     return Container(
       padding: EdgeInsets.fromLTRB(10.0, 0.0, 10.0, 0.0),
       child: ListTile(
-        onLongPress: () {
-          showDeleteContactWarning(context, contact);
-        },
-        contentPadding: EdgeInsets.fromLTRB(10.0, 10.0, 10.0, 0.0),
-        leading: ClipRRect(
-            borderRadius: BorderRadius.circular(30.0),
-            child: contact.avatarURL != ""
-                ? Image.asset(
-                    contact.avatarURL,
-                    fit: BoxFit.cover,
-                    // height: 60.0,
-                    // width: 100.0,
-                  )
-                : Icon(
-                    Icons.person,
-                    size: 40.0,
-                  )),
-        title: Text(
-          contact.visibleName,
-          style: TextStyle(
-              fontWeight: FontWeight.normal,
-              fontSize: 20.0,
-              color: Colors.grey[600]),
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            contact.accepted == true
-                ? Container(
-                    alignment: AlignmentDirectional.centerStart,
-                    child: Text(
-                      "Last Contacted " +
-                          DateFormat('dd MMM').format(contact.lastContacted),
-                      style: TextStyle(
-                          color: Colors.grey,
-                          fontSize: 12.0,
-                          fontStyle: FontStyle.normal),
+          onLongPress: () {
+            showDeleteContactWarning(context, contact);
+          },
+          contentPadding: EdgeInsets.fromLTRB(10.0, 10.0, 10.0, 0.0),
+          leading: ClipRRect(
+              borderRadius: BorderRadius.circular(30.0),
+              child: contact.avatarURL != ""
+                  ? Image.asset(
+                      contact.avatarURL,
+                      fit: BoxFit.cover,
+                      // height: 60.0,
+                      // width: 100.0,
+                    )
+                  : Icon(
+                      Icons.person,
+                      size: 40.0,
+                    )),
+          title: Text(
+            contact.visibleName,
+            style: TextStyle(
+                fontWeight: FontWeight.normal,
+                fontSize: 20.0,
+                color: Colors.grey[600]),
+          ),
+          subtitle: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              contact.accepted == true
+                  ? Container(
+                      alignment: AlignmentDirectional.centerStart,
+                      child: Text(
+                        "Last Contacted " +
+                            DateFormat('dd MMM').format(contact.lastContacted),
+                        style: TextStyle(
+                            color: Colors.grey,
+                            fontSize: 12.0,
+                            fontStyle: FontStyle.normal),
+                      ),
+                      margin: EdgeInsets.only(left: 3.0, top: .0, bottom: 5.0),
+                    )
+                  : Container(
+                      margin: EdgeInsets.only(left: 2.0, top: .0, bottom: 5.0),
+                      child: Text(
+                        "Pending Request",
+                        style: TextStyle(
+                            color: Colors.grey,
+                            fontSize: 12.0,
+                            fontStyle: FontStyle.normal),
+                      ),
                     ),
-                    margin: EdgeInsets.only(left: 3.0, top: .0, bottom: 5.0),
-                  )
-                : Container(
-                    margin: EdgeInsets.only(left: 2.0, top: .0, bottom: 5.0),
-                    child: Text(
-                      "Pending Request",
-                      style: TextStyle(
-                          color: Colors.grey,
-                          fontSize: 12.0,
-                          fontStyle: FontStyle.normal),
-                    ),
-                  ),
-          ],
-        ),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            IconButton(
-              onPressed: () {
-                messageContact(contact);
-              },
-              icon: Icon(
-                Icons.message,
-                color: Colors.grey[600],
-                size: 30.0,
+            ],
+          ),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              IconButton(
+                onPressed: () {},
+                icon: Icon(
+                  Icons.message,
+                  color: Colors.grey[600],
+                  size: 30.0,
+                ),
               ),
-            ),
-            // Padding(
-            // //   padding: EdgeInsets.all(10.0),
-            // // ),
-            IconButton(
-              onPressed: () {
-                callContact(contact);
-              },
-              icon: Icon(
-                Icons.call,
-                color: Colors.grey[600],
-                size: 30.0,
+              // Padding(
+              // //   padding: EdgeInsets.all(10.0),
+              // // ),
+              IconButton(
+                onPressed: () {
+                  callContact(contact);
+                },
+                icon: Icon(
+                  Icons.call,
+                  color: Colors.grey[600],
+                  size: 30.0,
+                ),
               ),
-            ),
-          ],
-        )
-      ),
+            ],
+          )),
     );
   }
 

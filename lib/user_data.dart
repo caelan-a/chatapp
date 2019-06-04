@@ -5,7 +5,7 @@ import 'dart:io';
 import 'dart:convert';
 import 'webrtc/handler_webrtc.dart';
 
-const String SERVER_IP = "192.168.1.92";
+const String SERVER_IP = "192.168.1.11";
 
 class UserData {
   String visibleName;
@@ -20,7 +20,9 @@ class UserData {
       {this.username, this.authHeader, this.savedContacts, this.visibleName}) {}
 
   void registerWithRTCServer(Function onIncomingCall, Function onEndCall) {
+    print("Registering with server");
     rtcHandler = RTCHandler(SERVER_IP, this, onIncomingCall, onEndCall);
+    rtcHandler.connectToServer(SERVER_IP, visibleName, "@" + username);
   }
 
   String getBase64Avatar() {

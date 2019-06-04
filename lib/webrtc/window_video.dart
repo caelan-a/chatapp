@@ -6,6 +6,9 @@ import 'package:flutter_webrtc/webrtc.dart';
 import '../user_data.dart';
 import '../contact.dart';
 import '../pulsating_market.dart';
+import 'package:chatapp/main.dart';
+import 'dart:typed_data';
+import 'dart:convert';
 
 const textStyle = TextStyle(
     fontSize: 12.0,
@@ -14,7 +17,6 @@ const textStyle = TextStyle(
     fontWeight: FontWeight.w600);
 
 class VideoCallScreen extends StatefulWidget {
-  final String ip;
   UserData userData;
   Contact contact;
   TabController tabController;
@@ -22,7 +24,6 @@ class VideoCallScreen extends StatefulWidget {
 
   VideoCallScreen(
       {Key key,
-      @required this.ip,
       @required this.userData,
       @required this.contact,
       @required this.tabController,
@@ -33,16 +34,41 @@ class VideoCallScreen extends StatefulWidget {
   _VideoCallScreenState createState() => new _VideoCallScreenState();
 }
 
+const double AVATAR_IMAGE_SIZE = 200.0;
+
 class _VideoCallScreenState extends State<VideoCallScreen> {
-  RTCVideoRenderer _localRenderer = new RTCVideoRenderer();
-  RTCVideoRenderer _remoteRenderer = new RTCVideoRenderer();
-
-  bool _inCalling = false;
-  bool _receivingCall = false;
-
   _VideoCallScreenState({
     Key key,
   });
+
+  Image getImageFromB64(String base64Str) {
+    return Image.memory(
+      base64Decode(base64Str),
+      width: AVATAR_IMAGE_SIZE,
+      height: AVATAR_IMAGE_SIZE,
+    );
+  }
+
+  Widget getUserAvatar(Contact contact) {
+    return ClipRRect(
+      clipBehavior: Clip.antiAliasWithSaveLayer,
+      borderRadius: BorderRadius.circular(150.0),
+      child: contact.avatarURL != ""
+          ? Image.asset(
+              widget.contact.avatarURL,
+              fit: BoxFit.cover,
+              // height: 60.0,
+              // width: 100.0,
+            )
+          : contact.avatarBase64 != ""
+              ? getImageFromB64(contact.avatarBase64)
+              : Icon(
+                  Icons.person,
+                  color: Colors.white,
+                  size: 100.0,
+                ),
+    );
+  }
 
   //  Shown if user is initiating a call or receiving a call request
   Widget _buildCallingScreen(bool outgoing) {
@@ -65,43 +91,28 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
                   screenPosition: Offset(0, 0),
                   scale: 0.13,
                   color: Colors.white,
-                  radius: 50.0,
+                  radius: 60.0,
                 ),
-                ClipRRect(
-                  clipBehavior: Clip.antiAliasWithSaveLayer,
-                  borderRadius: BorderRadius.circular(150.0),
-                  child: widget.contact.avatarURL != ""
-                      ? Image.asset(
-                          widget.contact.avatarURL,
-                          fit: BoxFit.cover,
-                          // height: 60.0,
-                          // width: 100.0,
-                        )
-                      : Icon(
-                          Icons.person,
-                          color: Colors.white,
-                          size: 100.0,
-                        ),
-                ),
+                getUserAvatar(widget.contact),
               ],
             ),
           ),
           Positioned(
-            top: MediaQuery.of(context).size.height / 1.55,
+            top: MediaQuery.of(context).size.height / 1.45,
             child: Text(
               !outgoing ? "Receiving a call from.." : "Connecting with..",
               style: textStyle,
             ),
           ),
           Positioned(
-            top: MediaQuery.of(context).size.height / 1.45,
+            top: MediaQuery.of(context).size.height / 1.35,
             child: Text(
               widget.contact.visibleName,
               style: textStyle.copyWith(fontSize: 32.0),
             ),
           ),
           Positioned(
-            top: MediaQuery.of(context).size.height / 1.25,
+            top: MediaQuery.of(context).size.height / 1.15,
             child: Padding(
               padding: const EdgeInsets.all(0.0),
               child: outgoing
@@ -182,37 +193,28 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
   @override
   initState() {
     super.initState();
-
-    initRenderers();
   }
 
-  initRenderers() async {
-    await _localRenderer.initialize();
-    await _remoteRenderer.initialize();
-
-    widget.userData.rtcHandler.initStreams(_localRenderer, _remoteRenderer);
-  }
+  void onEndCall() {}
 
   @override
   deactivate() {
     super.deactivate();
-    _localRenderer.dispose();
-    _remoteRenderer.dispose();
+    widget.userData.rtcHandler.disposeRenderers();
   }
 
   void acceptCall() {
-    this.setState(() {
-      _inCalling = true;
-      _receivingCall = false;
+    widget.userData.rtcHandler.initRenderers();
+    this.setState(() async {
+      widget.userData.rtcHandler.acceptCall();
     });
   }
 
   void rejectCall() {
-    widget.userData.rtcHandler.hangUp();
     this.setState(() {
-      _inCalling = false;
-      _receivingCall = false;
+      widget.userData.rtcHandler.hangUp();
     });
+    Main.popScreens(context, 1);
   }
 
   _switchCamera() {
@@ -223,9 +225,10 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
 
   @override
   Widget build(BuildContext context) {
+    print(widget.userData.rtcHandler.isInCall());
     return new Scaffold(
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: _inCalling
+      floatingActionButton: widget.userData.rtcHandler.isInCall()
           ? new SizedBox(
               width: 300.0,
               child: new Row(
@@ -267,9 +270,10 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
                     ),
                   ]))
           : null,
-      body: _receivingCall
-          ? _buildCallingScreen(false)
-          : _inCalling
+      body: widget.userData.rtcHandler.isBeingCalled() ||
+              widget.userData.rtcHandler.isRequestingCall()
+          ? _buildCallingScreen(widget.outgoing)
+          : widget.userData.rtcHandler.isInCall()
               ? OrientationBuilder(builder: (context, orientation) {
                   return new Container(
                     decoration: BoxDecoration(
@@ -288,7 +292,8 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
                             margin: new EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 0.0),
                             width: MediaQuery.of(context).size.width,
                             height: MediaQuery.of(context).size.height,
-                            child: new RTCVideoView(_remoteRenderer),
+                            child: new RTCVideoView(
+                                widget.userData.rtcHandler.getRemoteRenderer()),
                             // decoration:
                             // new BoxDecoration(color: Colors.black26),
                           )),
@@ -302,7 +307,8 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
                           height: orientation == Orientation.portrait
                               ? 120.0
                               : 90.0,
-                          child: new RTCVideoView(_localRenderer),
+                          child: new RTCVideoView(
+                              widget.userData.rtcHandler.getLocalRenderer()),
                           decoration: new BoxDecoration(color: Colors.black54),
                         ),
                       ),
