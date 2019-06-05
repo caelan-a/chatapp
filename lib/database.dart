@@ -71,16 +71,19 @@ class Database {
   }
 
   static Future<dynamic> sendRegisterRequest(
-      String username, String password, String email) async {
+      String username, String password, String visibleName) async {
     Map<String, dynamic> json_data = {
       "Username": username,
       "Password": password,
-      "Email": email,
+      "Name": visibleName,
     };
 
-    var response = json.decode(
-        json.decode(await _post(URL_REGISTER, "", jsonEncode(json_data))));
-    print(response);
+    await justWait(numberOfSeconds: 2);
+    Map<String, dynamic> result = {
+      "status": LoginResponse.success,
+      "authHeader": "IamcaelanUserxxxAuthxxxUnique"
+    };
+    return result;
   }
 
   static Future<String> _post(String url, String authHeader, var body) async {

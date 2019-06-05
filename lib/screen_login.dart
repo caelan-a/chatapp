@@ -3,10 +3,12 @@ import 'package:flutter/material.dart';
 import 'login_background.dart';
 import 'screen_contacts.dart';
 import 'screen_loading.dart';
-import 'register.dart';
+import 'screen_register.dart';
 import 'main.dart';
 import 'database.dart';
 import 'user_data.dart';
+import 'package:path_provider/path_provider.dart';
+import 'dart:io';
 
 class LoginScreen extends StatefulWidget {
   LoginScreen({Key key}) : super(key: key);
@@ -23,7 +25,6 @@ class _LoginScreenState extends State<LoginScreen>
 
   TextEditingController usernameController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
-
 
   GlobalKey<LoadingScreenState> loadingScreenKey = GlobalKey();
 
@@ -51,6 +52,13 @@ class _LoginScreenState extends State<LoginScreen>
     );
   }
 
+
+  @override
+  void initState() {
+
+    super.initState();
+  }
+
   void login(String username, String password) {
     Main.toScreen(context,
         LoadingScreen(loadingText: "Logging in..", key: loadingScreenKey));
@@ -58,7 +66,8 @@ class _LoginScreenState extends State<LoginScreen>
     Database.sendLoginRequest(username, password).then((result) async {
       if (result['status'] == LoginResponse.success) {
         UserData user = await UserData.getUser(username, result['authHeader']);
-        loadingScreenKey.currentState.setLoadingText("Successfully logged in..");
+        loadingScreenKey.currentState
+            .setLoadingText("Successfully logged in..");
 
         Main.toScreen(
             context,
@@ -72,12 +81,13 @@ class _LoginScreenState extends State<LoginScreen>
             "Username or password incorrect.\nPlease check and try again");
       }
     });
-
   }
 
-  void goToSignUp() {
-    Navigator.of(context, rootNavigator: true)
-        .push(MaterialPageRoute(builder: (context) => RegisterScreen()));
+  void goToSignUp(GlobalKey<LoadingScreenState> loadingScreenKey) {
+    Navigator.of(context, rootNavigator: true).push(MaterialPageRoute(
+        builder: (context) => RegisterScreen(
+              loadingScreenKey: loadingScreenKey,
+            )));
   }
 
   Widget _buildLoginForm() {
@@ -138,7 +148,7 @@ class _LoginScreenState extends State<LoginScreen>
                           borderRadius: new BorderRadius.circular(30.0)),
                       textColor: Theme.of(context).primaryColor,
                       onPressed: () {
-                        goToSignUp();
+                        goToSignUp(loadingScreenKey);
                       },
                       color: Theme.of(context).primaryColor,
                       child: Text("Sign Up"),

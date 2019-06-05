@@ -8,6 +8,7 @@ import 'main.dart';
 import 'package:chatapp/screen_contact_search.dart';
 import 'dart:convert';
 import 'dart:typed_data';
+import 'screen_ringing.dart';
 
 class ContactsScreen extends StatefulWidget {
   UserData userData;
@@ -25,7 +26,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
         (String visibleName, String username, String avatarBase64) {
       Main.toScreen(
           context,
-          CallScreen(
+          RingingScreen(
             contact: Contact(
               username: username,
               visibleName: visibleName,
@@ -33,34 +34,63 @@ class _ContactsScreenState extends State<ContactsScreen> {
             ),
             userData: widget.userData,
             outgoing: false,
-            initialTab: 1,
           ));
     };
 
-    Function onEndCall() {
-      widget.userData.rtcHandler.disposeRenderers();
-      widget.userData.rtcHandler.hangUp();
+    Function onEndCall = () {
+      Main.popScreens(context, 1);
       print("End Call");
-    }
+    };
 
-    widget.userData.registerWithRTCServer(onIncomingCall, onEndCall);
+    Function onCallAccepted = (String username, String visibleName, String avatarBase64) {
+      //  If contact is new
+      Contact contact = widget.userData.acceptContact(username, avatarBase64);
+
+      Main.popScreens(context, 1);
+
+      Main.toScreen(
+          context,
+          RingingScreen(
+            contact: contact,
+            userData: widget.userData,
+            outgoing: false,
+          ));
+
+      print("Set state with inCall = ${widget.userData.rtcHandler.isInCall()}");
+    };
+
+    widget.userData
+        .registerWithRTCServer(onIncomingCall, onEndCall, onCallAccepted);
     super.initState();
   }
 
-  void callContact(Contact contact) {
-    print("Call contact");
-    widget.userData.rtcHandler.makeCall("366320", 'video', false);
-    Main.toScreen(
-        context,
-        CallScreen(
-          contact: contact,
-          userData: widget.userData,
-          outgoing: true,
-          initialTab: 1,
-        ));
+  void logout() {
+    widget.userData.rtcHandler.disconnectFromServer();
   }
 
-  static void showLogOutWarning(BuildContext context) {
+  void callContact(Contact contact) async {
+    print("Call contact");
+
+    print(
+        "USER ${contact.username} online: ${widget.userData.rtcHandler.isUserOnline(contact.username)}");
+
+    if (widget.userData.rtcHandler.isUserOnline(contact.username)) {
+      await widget.userData.rtcHandler
+          .makeCall(contact.username, 'video', false);
+      Main.toScreen(
+          context,
+          RingingScreen(
+            contact: contact,
+            userData: widget.userData,
+            outgoing: true,
+          ));
+      setState(() {});
+    } else {
+      print("${contact.username} is not online");
+    }
+  }
+
+  void showLogOutWarning(BuildContext context) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -80,6 +110,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
             FlatButton(
               child: new Text("Logout"),
               onPressed: () {
+                widget.userData.rtcHandler.disconnectFromServer();
                 Main.popScreens(context, 3);
               },
             ),
@@ -248,12 +279,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
               centerTitle: true,
               title: ClipRRect(
                 borderRadius: BorderRadius.circular(30.0),
-                child: Image.asset(
-                  "assets/0.jpg",
-                  fit: BoxFit.cover,
-                  height: 35.0,
-                  width: 35.0,
-                ),
+                child: widget.userData.getAvatar(35.0, 35.0)
               ),
               leading: IconButton(
                 iconSize: 24.0,

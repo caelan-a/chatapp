@@ -61,6 +61,7 @@ class RTCHandler {
   Signaling _signaling; // used to communicate and listen to server
   Function(String, String, String) onIncomingCall;
   Function onEndCall;
+  Function(String, String, String) onCallAccepted;
   List<dynamic> _peers;
   var _selfId;
   UserData userData;
@@ -73,23 +74,28 @@ class RTCHandler {
   bool _isInCall = false;
   bool _isRequestingCall = false;
 
-  RTCHandler(String serverIp, UserData userData,
-      Function(String, String, String) onIncomingCall, Function onEndCall) {
+  RTCHandler(
+      String serverIp,
+      UserData userData,
+      Function(String, String, String) onIncomingCall,
+      Function onEndCall,
+      Function onCallAccepted) {
     this.userData = userData;
     this.serverIp = serverIp;
     this.onIncomingCall = onIncomingCall;
     this.onEndCall = onEndCall;
+    this.onCallAccepted = onCallAccepted;
   }
 
   //  Starts media streams
-  void initRenderers() async {
+  Future<void> initRenderers() async {
     await _localRenderer.initialize();
     await _remoteRenderer.initialize();
   }
 
   void disposeRenderers() {
-    _localRenderer.dispose();
-    _remoteRenderer.dispose();
+    _localRenderer?.dispose();
+    _remoteRenderer?.dispose();
   }
 
   RTCVideoRenderer getLocalRenderer() {
@@ -104,16 +110,19 @@ class RTCHandler {
     _signaling.switchCamera();
   }
 
-  void makeCall(String usernameToCall, var media, bool use_screen) {
+  Future<void> makeCall(
+      String usernameToCall, var media, bool use_screen) async {
     if (_signaling != null) {
+      _isRequestingCall = true;
+      await initRenderers();
       _signaling.invite(usernameToCall, media, use_screen, userData);
     }
   }
 
-  void acceptCall() {
+  Future<void> acceptCall() async {
     if (_signaling != null) {
-      _signaling.acceptInvite(_signaling.latestInvite.fromUsername,
-          _signaling.latestInvite.media, _signaling.latestInvite.description);
+      await initRenderers();
+      _signaling.acceptInvite();
     }
   }
 
@@ -149,8 +158,16 @@ class RTCHandler {
   }
 
   bool isUserOnline(String username) {
-    if(_peers != null) {
-      
+    if (_peers != null) {
+      bool peerOnline = false;
+      _peers.forEach((p) {
+        bool equal = p['id'] == username;
+        if (equal == true) {
+          peerOnline = true;
+        }
+        print("p" + peerOnline.toString());
+      });
+      return peerOnline;
     } else {
       //  No peers => not connected
       return false;
@@ -163,44 +180,67 @@ class RTCHandler {
 
       //  setup messaging
       //  format is json
-      _signaling.onDataChannelMessage = (dc, RTCDataChannelMessage data) {
-        if (data.isBinary) {
-          print('Got binary [' + data.binary.toString() + ']');
-        } else {
-          handleMessage(data.text);
-        }
-      };
+      // _signaling.onDataChannelMessage = (dc, RTCDataChannelMessage data) {
+      //   if (data.isBinary) {
+      //     print('Got binary [' + data.binary.toString() + ']');
+      //   } else {
+      //     handleMessage(data.text);
+      //   }
+      // };
 
-      _signaling.onDataChannel = (channel) {
-        _dataChannel = channel;
-      };
+      // _signaling.onDataChannel = (channel) {
+      //   _dataChannel = channel;
+      // };
 
       _signaling.onStateChange = (SignalingState state) {
-        _isBeingCalled = false;
-        _isInCall = false;
+        print("CALL STATE: $state");
 
+        if (state != SignalingState.CallStateBye) {
+          _isBeingCalled = false;
+          _isInCall = false;
+          _isRequestingCall = false;
+        }
         switch (state) {
           case SignalingState.CallStateNew:
-            // onIncomingCall();
+            _isInCall = true;
+            onCallAccepted(_signaling.latestCall.fromVisibleName,
+                _signaling.latestCall.fromUsername,
+                _signaling.latestCall.fromAvatarBase64);
+            print("\n\nCALL CONNECTED\n\n");
             break;
           case SignalingState.CallStateBye:
-            onEndCall();
-
+            if (_isInCall || _isBeingCalled || _isRequestingCall) {
+              disposeRenderers();
+              onEndCall();
+              _isBeingCalled = false;
+              _isInCall = false;
+              _isRequestingCall = false;
+              print("\n\n BYE\n\n");
+            }
             break;
           case SignalingState.CallStateInvite:
             onIncomingCall(
-                _signaling.latestInvite.fromVisibleName,
-                _signaling.latestInvite.fromUsername,
-                _signaling.latestInvite.fromAvatarBase64);
+                _signaling.latestCall.fromVisibleName,
+                _signaling.latestCall.fromUsername,
+                _signaling.latestCall.fromAvatarBase64);
 
             _isBeingCalled = true;
+            print("\n\n CALL INVITE\n\n");
+
             break;
           case SignalingState.CallStateConnected:
             _isInCall = true;
-            print("CALL CONNECTED");
+            print("\n\n CALL CONNECTED\n\n");
+            onCallAccepted(
+                _signaling.latestCall.fromVisibleName,
+                _signaling.latestCall.fromUsername,
+                _signaling.latestCall.fromAvatarBase64);
+
             break;
           case SignalingState.CallStateRinging:
             _isRequestingCall = true;
+            print("\n\n CALL RINGING\n\n");
+
             break;
           case SignalingState.ConnectionClosed:
           case SignalingState.ConnectionError:

@@ -5,8 +5,9 @@ import 'dart:math';
 import 'package:flutter_webrtc/webrtc.dart';
 import '../user_data.dart';
 import 'handler_webrtc.dart';
+import 'package:flutter/foundation.dart';
 
-class Invite {
+class Call {
   var id;
   var description;
   var media;
@@ -17,7 +18,7 @@ class Invite {
 
   var sessionID;
 
-  Invite(
+  Call(
       {this.id,
       this.description,
       this.media,
@@ -67,7 +68,7 @@ class Signaling {
   DataChannelMessageCallback onDataChannelMessage;
   DataChannelCallback onDataChannel;
 
-  Invite latestInvite;
+  Call latestCall;
 
   Map<String, dynamic> _iceServers = {
     'iceServers': [
@@ -83,8 +84,8 @@ class Signaling {
     ]
   };
 
-  Invite getLatestInvite() {
-    return latestInvite;
+  Call getLatestCall() {
+    return latestCall;
   }
 
   final Map<String, dynamic> _config = {
@@ -135,16 +136,16 @@ class Signaling {
     this._sessionId = this._selfId + '-' + peer_id;
 
     if (this.onStateChange != null) {
-      this.onStateChange(SignalingState.CallStateNew);
+      this.onStateChange(SignalingState.CallStateRinging);
     }
 
-    _createPeerConnection(peer_id, media, use_screen).then((pc) {
+    _createPeerConnection(peer_id, media, false).then((pc) {
       _peerConnections[peer_id] = pc;
       if (media == 'data') {
         _createDataChannel(peer_id, pc);
       }
-      _createOffer(peer_id, pc, media, userData.username, userData.visibleName,
-          userData.getBase64Avatar());
+      _createOffer(peer_id, pc, media, "@" + userData.username,
+          userData.visibleName, userData.getBase64Avatar());
     });
   }
 
@@ -155,17 +156,20 @@ class Signaling {
     });
   }
 
-  void acceptInvite(var id, var media, var description) {
+  void acceptInvite() {
+    var id = latestCall.id;
+    var media = latestCall.media;
+    var description = latestCall.description;
+
+    print("\n\nACCEPT INVITE\n\n");
     _createPeerConnection(id, media, false).then((pc) {
       _peerConnections[id] = pc;
       pc.setRemoteDescription(
           new RTCSessionDescription(description['sdp'], description['type']));
+
+      print("\n\nCREATE ANSWER\n\n");
       _createAnswer(id, pc, media);
     });
-
-    if (this.onStateChange != null) {
-      this.onStateChange(SignalingState.CallStateNew);
-    }
 
     if (this.onStateChange != null) {
       this.onStateChange(SignalingState.CallStateConnected);
@@ -194,23 +198,23 @@ class Signaling {
           var description = data['description'];
           var media = data['media'];
 
-          var fromUsername = "tester";
-          var fromVisibleName = "Mr Tester";
-          var fromAvatarBase64 = test_image_b64;
-
-          // var fromUsername = data['from_username'];
-          // var fromVisibleName = data['from_visible_name'];
-          // var fromAvatarBase64 = data['from_avatar_base64'];
+          String fromUsername = description['from_username'];
+          String fromVisibleName = description['from_visible_name'];
+          String fromAvatarBase64 = description['from_avatar_base64'];
 
           var sessionId = data['session_id'];
 
-          latestInvite = Invite(
-              description: description,
-              id: id,
-              media: media,
-              fromUsername: fromUsername,
-              fromVisibleName: fromVisibleName,
-              fromAvatarBase64: fromAvatarBase64);
+          String test = description['from'];
+          print("DATA RESPONSE: $test");
+          latestCall = Call(
+            description: description,
+            id: id,
+            media: media,
+            fromUsername: fromUsername,
+            fromVisibleName: fromVisibleName,
+            fromAvatarBase64: fromAvatarBase64,
+            sessionID: sessionId,
+          );
 
           print("Offer from $fromUsername");
 
@@ -226,10 +230,29 @@ class Signaling {
           var id = data['from'];
           var description = data['description'];
 
+          //  User info
+          var fromUsername = description['from_username'];
+          var fromVisibleName = description['from_visible_name'];
+          var fromAvatarBase64 = description['from_avatar_base64'];
+          var sessionId = data['session_id'];
+
+          latestCall = Call(
+            description: description,
+            id: id,
+            fromUsername: fromUsername,
+            fromVisibleName: fromVisibleName,
+            fromAvatarBase64: fromAvatarBase64,
+            sessionID: sessionId,
+          );
+
           var pc = _peerConnections[id];
           if (pc != null) {
             pc.setRemoteDescription(new RTCSessionDescription(
                 description['sdp'], description['type']));
+          }
+
+          if (this.onStateChange != null) {
+            this.onStateChange(SignalingState.CallStateNew);
           }
         }
         break;
@@ -357,9 +380,8 @@ class Signaling {
       }
 
       _socket.listen((data) {
-        print('Received Server Message: ' + data);
-        JsonDecoder decoder = new JsonDecoder();
-        this.onServerMessage(decoder.convert(data));
+        debugPrint('Received Server Message: ' + data);
+        this.onServerMessage(jsonDecode(data));
       }, onDone: () {
         print('Closed by server!');
         if (this.onStateChange != null) {
@@ -367,6 +389,7 @@ class Signaling {
         }
       });
 
+      // Send new to connect to server
       _send('new', {
         'name': _displayName,
         'id': _selfId,
@@ -424,7 +447,7 @@ class Signaling {
 
     pc.onAddStream = (stream) {
       if (this.onAddRemoteStream != null) this.onAddRemoteStream(stream);
-      //_remoteStreams.add(stream);
+      // _remoteStreams.add(stream);
     };
 
     pc.onRemoveStream = (stream) {
@@ -471,12 +494,15 @@ class Signaling {
       pc.setLocalDescription(s);
       _send('offer', {
         'to': id,
-        'description': {'sdp': s.sdp, 'type': s.type},
+        'description': {
+          'sdp': s.sdp,
+          'type': s.type,
+          'from_username': fromUsername,
+          'from_visible_name': fromVisibleName,
+          'from_avatar_base64': fromAvatarBase64,
+        },
         'session_id': this._sessionId,
         'media': media,
-        'from_username': fromUsername,
-        'from_visible_name': fromVisibleName,
-        'from_avatar_base64': fromAvatarBase64,
       });
     } catch (e) {
       print(e.toString());
@@ -488,6 +514,7 @@ class Signaling {
       RTCSessionDescription s = await pc
           .createAnswer(media == 'data' ? _dc_constraints : _constraints);
       pc.setLocalDescription(s);
+      print("\n\n SEND ANSWER \n\n");
       _send('answer', {
         'to': id,
         'description': {'sdp': s.sdp, 'type': s.type},
@@ -502,7 +529,7 @@ class Signaling {
     data['type'] = event;
     JsonEncoder encoder = new JsonEncoder();
     if (_socket != null) _socket.add(encoder.convert(data));
-    print('send: ' + encoder.convert(data));
+    // print('send: ' + encoder.convert(data));
   }
 }
 
