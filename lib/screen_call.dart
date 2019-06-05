@@ -12,13 +12,11 @@ class CallScreen extends StatefulWidget {
   final Contact contact;
   UserData userData;
   int initialTab;
-  bool outgoing;
 
   CallScreen(
       {Key key,
       @required this.contact,
       @required this.userData,
-      this.outgoing = false,
       this.initialTab = 0})
       : super(key: key);
 
@@ -81,7 +79,6 @@ class _CallScreenState extends State<CallScreen>
               contact: widget.contact,
               tabController: tabController,
               userData: widget.userData,
-              outgoing: widget.outgoing,
             ),
           ],
         ),

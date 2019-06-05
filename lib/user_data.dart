@@ -67,11 +67,18 @@ class UserData {
   }
 
   Contact acceptContact(String username, String avatarBase64) {
-    Contact contact =
-        savedContacts.firstWhere((Contact c) => c.username == username);
+    print("ACCEPTING CONTACT $username");
+    Contact contact = Contact(username: username, avatarBase64: avatarBase64);
+    savedContacts.forEach((c) {
+      if (c.username == username) {
+        contact = c;
+        print("Contact found");
+      }
+    });
+
     contact.accepted = true;
     contact.avatarBase64 = avatarBase64;
-    writeBase64ToFile(username, avatarBase64).then((file) {
+    writeBase64ToFile(username + '_avatar.b64', avatarBase64).then((file) {
       saveContact(contact);
     });
     return contact;

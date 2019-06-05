@@ -44,16 +44,16 @@ class _ContactsScreenState extends State<ContactsScreen> {
 
     Function onCallAccepted = (String username, String visibleName, String avatarBase64) {
       //  If contact is new
-      Contact contact = widget.userData.acceptContact(username, avatarBase64);
-
+      // Contact contact = widget.userData.acceptContact(username, avatarBase64);
+      print("go to call screen");
       Main.popScreens(context, 1);
 
       Main.toScreen(
           context,
-          RingingScreen(
-            contact: contact,
+          CallScreen(
+            contact: Contact(username: username, visibleName: visibleName, avatarBase64: avatarBase64),
             userData: widget.userData,
-            outgoing: false,
+            initialTab: 1,
           ));
 
       print("Set state with inCall = ${widget.userData.rtcHandler.isInCall()}");

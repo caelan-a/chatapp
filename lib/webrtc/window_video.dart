@@ -20,14 +20,12 @@ class VideoCallScreen extends StatefulWidget {
   UserData userData;
   Contact contact;
   TabController tabController;
-  bool outgoing;
 
   VideoCallScreen(
       {Key key,
       @required this.userData,
       @required this.contact,
-      @required this.tabController,
-      @required this.outgoing})
+      @required this.tabController,})
       : super(key: key);
 
   @override

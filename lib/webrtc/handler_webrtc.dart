@@ -202,11 +202,6 @@ class RTCHandler {
         }
         switch (state) {
           case SignalingState.CallStateNew:
-            _isInCall = true;
-            onCallAccepted(_signaling.latestCall.fromVisibleName,
-                _signaling.latestCall.fromUsername,
-                _signaling.latestCall.fromAvatarBase64);
-            print("\n\nCALL CONNECTED\n\n");
             break;
           case SignalingState.CallStateBye:
             if (_isInCall || _isBeingCalled || _isRequestingCall) {
